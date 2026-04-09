@@ -1,4 +1,3 @@
-// src/router/routes.ts
 import { createRoute } from "@kitbag/router"
 import { defineAsyncComponent } from "vue"
 

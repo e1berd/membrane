@@ -8,13 +8,13 @@ import { getCurrentWindow } from '@tauri-apps/api/window'
 const tab = ref('signin')
 
 const signInSchema = z.object({
-  email: z.string().email('Некорректный email'),
-  password: z.string().min(6, 'Минимум 6 символов'),
+  email: z.email({ message: 'Некорректный email' }),
+  password: z.string().min(6, { message: 'Минимум 6 символов' }),
 })
 
 const signUpSchema = z.object({
-  email: z.string().email('Некорректный email'),
-  password: z.string().min(6, 'Минимум 6 символов'),
+  email: z.email({ message: 'Некорректный email' }),
+  password: z.string().min(6, { message: 'Минимум 6 символов' }),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'Пароли не совпадают',
