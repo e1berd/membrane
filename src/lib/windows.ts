@@ -21,14 +21,3 @@ export async function openMainWindow() {
   await main.show()
   await main.setFocus()
 }
-
-export async function openChatWindow(chatId: string, title: string) {
-  const chat = new WebviewWindow(`chat-${chatId}`, {
-    url: `/chat/${chatId}`,
-    title,
-    width: 600,
-    height: 700,
-    minWidth: 400,
-    minHeight: 500,
-  })
-}
