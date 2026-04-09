@@ -1,24 +1,41 @@
-import { createApp } from "vue"
-import App from "./App.vue"
-import { supabase } from "./lib/supabase"
-import { openIamWindow } from "./lib/windows"
-import { getCurrentWindow } from "@tauri-apps/api/window"
-import { listen } from "@tauri-apps/api/event"
-import { router } from "./router"
+import { createApp } from 'vue'
+import App from './App.vue'
+import { supabase } from './lib/supabase'
+import { openIamWindow, openErrorWindow } from './lib/windows'
+import { getCurrentWindow } from '@tauri-apps/api/window'
+import { listen } from '@tauri-apps/api/event'
+import { router } from './router'
 import { vuetify } from '@/plugins/vuetify'
 import { setupRstore } from '@/rstore'
 
 let currentWindow: ReturnType<typeof getCurrentWindow>
 
+async function healthCheck(): Promise<boolean> {
+  try {
+    const { error } = await supabase.from('profiles').select('id').limit(1)
+    return !error
+  } catch {
+    return false
+  }
+}
+
 async function initializeApp() {
   currentWindow = getCurrentWindow()
-  
+
   const app = createApp(App)
   app.use(router).use(vuetify)
   await setupRstore(app)
-  app.mount("#app")
+  app.mount('#app')
 
-  if (currentWindow.label === "main") {
+  if (currentWindow.label === 'main') {
+    const healthy = await healthCheck()
+
+    if (!healthy) {
+      await openErrorWindow()
+      await listen('health-ok', () => initAuth())
+      return
+    }
+
     await initAuth()
   }
 }
@@ -32,7 +49,7 @@ async function initAuth() {
     await openIamWindow()
   }
 
-  await listen("auth-success", async () => {
+  await listen('auth-success', async () => {
     await currentWindow.show()
     await currentWindow.setFocus()
   })

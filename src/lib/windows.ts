@@ -21,3 +21,18 @@ export async function openMainWindow() {
   await main.show()
   await main.setFocus()
 }
+
+export async function openErrorWindow() {
+  const error = new WebviewWindow('error', {
+    url: '/error',
+    title: 'Membrane — Ошибка',
+    width: 400,
+    height: 350,
+    resizable: false,
+    center: true,
+  })
+
+  error.once('tauri://error', (e) => {
+    console.error('Ошибка создания окна:', e)
+  })
+}
