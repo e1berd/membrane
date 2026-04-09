@@ -32,15 +32,14 @@ async function initializeApp() {
 
     if (!healthy) {
       await openErrorWindow()
-      await listen('health-ok', () => initAuth())
+      await listen('health-ok', () => initIam())
       return
     }
-
-    await initAuth()
+    await initIam()
   }
 }
 
-async function initAuth() {
+async function initIam() {
   const { data } = await supabase.auth.getSession()
 
   if (data.session) {
@@ -50,6 +49,7 @@ async function initAuth() {
   }
 
   await listen('auth-success', async () => {
+    await router.push('/')
     await currentWindow.show()
     await currentWindow.setFocus()
   })

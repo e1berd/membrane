@@ -104,6 +104,9 @@ async function handleSignUp() {
 
   serverSuccess.value = 'Аккаунт создан. Проверьте почту для подтверждения.'
   loading.value = false
+
+  await emit('auth-success')
+  await getCurrentWindow().close()
 }
 
 function onTabChange() {
