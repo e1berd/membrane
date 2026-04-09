@@ -9,9 +9,9 @@ export const mainRoute = createRoute({
 })
 
 export const signInRoute = createRoute({
-  name: "sign-in",
-  path: "/sign-in",
-  component: defineAsyncComponent(() => import("../views/SignInView.vue")),
+  name: "iam",
+  path: "/iam",
+  component: defineAsyncComponent(() => import("../views/IamView.vue")),
 })
 
 export const routes = [mainRoute, signInRoute] as const

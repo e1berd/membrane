@@ -1,9 +1,9 @@
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow"
 import { getCurrentWindow } from "@tauri-apps/api/window"
 
-export async function openSignInWindow() {
-  const signIn = new WebviewWindow("sign-in", {
-    url: "/sign-in",
+export async function openIamWindow() {
+  const iam = new WebviewWindow("iam", {
+    url: "/iam",
     title: "Membrane — Вход",
     width: 420,
     height: 520,
@@ -11,7 +11,7 @@ export async function openSignInWindow() {
     center: true,
   })
 
-  signIn.once("tauri://error", (e) => {
+  iam.once("tauri://error", (e) => {
     console.error("Ошибка создания окна логина:", e)
   })
 }
