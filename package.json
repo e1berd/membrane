@@ -10,6 +10,7 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@kitbag/router": "^0.24.1",
     "@supabase/supabase-js": "^2.103.0",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-opener": "^2",
