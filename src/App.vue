@@ -2,19 +2,12 @@
 import { ref } from 'vue'
 import AppSidebar from '@/components/AppSidebar.vue'
 
-const sidebarRef = ref<InstanceType<typeof AppSidebar> | null>(null)
 const showMenu = ref(false)
 
 const menuItems = [
   { icon: 'mdi-cog', title: 'Настройки', action: 'settings' },
 ]
 
-function handleMenuItem(action: string) {
-  if (action === 'settings' && sidebarRef.value) {
-    sidebarRef.value.showSettingsDialog.value = true
-  }
-  showMenu.value = false
-}
 </script>
 
 <template>
@@ -35,7 +28,6 @@ function handleMenuItem(action: string) {
           :key="item.icon"
           :prepend-icon="item.icon"
           :title="item.title"
-          @click="handleMenuItem(item.action)"
         />
       </v-list>
     </v-navigation-drawer>

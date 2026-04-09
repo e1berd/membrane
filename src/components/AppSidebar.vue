@@ -9,7 +9,7 @@ import { router } from '@/router'
     permanent
   >
 
-z    <v-list density="compact" nav>
+    <v-list density="compact" nav>
     </v-list>
 
     <template #append>
