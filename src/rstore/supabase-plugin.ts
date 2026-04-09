@@ -22,7 +22,7 @@ export const supabasePlugin = definePlugin({
         .from(payload.collection.name)
         .select('*')
 
-      const params = payload.getParams()
+      const params = payload.findOptions?.params
       if (params) {
         for (const [key, value] of Object.entries(params)) {
           query = query.eq(key, value)
@@ -37,7 +37,7 @@ export const supabasePlugin = definePlugin({
     hook('createItem', async (payload) => {
       const { data, error } = await supabase
         .from(payload.collection.name)
-        .insert(payload.item)
+        .insert(payload.item as any)
         .select()
         .single()
 
@@ -48,7 +48,7 @@ export const supabasePlugin = definePlugin({
     hook('updateItem', async (payload) => {
       const { data, error } = await supabase
         .from(payload.collection.name)
-        .update(payload.item)
+        .update(payload.item as any)
         .eq('id', payload.key)
         .select()
         .single()

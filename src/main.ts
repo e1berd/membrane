@@ -8,14 +8,19 @@ import { router } from "./router"
 import { vuetify } from '@/plugins/vuetify'
 import { setupRstore } from '@/rstore'
 
-const app = createApp(App)
-app.use(router).use(vuetify)
-await setupRstore(app)
-app.mount("#app")
+let currentWindow: ReturnType<typeof getCurrentWindow>
 
-const currentWindow = getCurrentWindow()
-if (currentWindow.label === "main") {
-  initAuth()
+async function initializeApp() {
+  currentWindow = getCurrentWindow()
+  
+  const app = createApp(App)
+  app.use(router).use(vuetify)
+  await setupRstore(app)
+  app.mount("#app")
+
+  if (currentWindow.label === "main") {
+    await initAuth()
+  }
 }
 
 async function initAuth() {
@@ -32,3 +37,5 @@ async function initAuth() {
     await currentWindow.setFocus()
   })
 }
+
+initializeApp().catch(console.error)
