@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { format } from 'date-fns'
 
 export interface ReplyInfo {
   id: string
@@ -26,8 +27,7 @@ const contextMenuX = ref(0)
 const contextMenuY = ref(0)
 
 const formattedTime = computed(() => {
-  const date = new Date(props.time)
-  return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+  return format(new Date(props.time), 'HH:mm')
 })
 
 const replyPreviewText = computed(() => {
@@ -73,7 +73,9 @@ function onReply() {
       >
         <span class="text-body-2 font-weight-medium">{{ avatar }}</span>
       </v-avatar>
-      <div v-else class="avatar-slot" />
+      <div v-else class="avatar-slot d-flex align-center justify-center">
+        <span class="hover-time text-caption text-on-surface-variant">{{ formattedTime }}</span>
+      </div>
 
       <div class="flex-grow-1 min-width-0">
         <div v-if="showHeader" class="d-flex align-center gap-2 mb-1">
@@ -127,6 +129,18 @@ function onReply() {
 .avatar-slot {
   width: 36px;
   min-width: 36px;
+}
+
+.hover-time {
+  opacity: 0;
+  font-size: 10px;
+  line-height: 1;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+
+.message-item:hover .hover-time {
+  opacity: 1;
 }
 
 .message-text {
