@@ -47,14 +47,6 @@ const editor = useEditor({
     }),
   ],
   editorProps: {
-    handleKeyDown(_view, event) {
-      if (event.key === 'Enter' && !event.shiftKey) {
-        event.preventDefault()
-        handleSend()
-        return true
-      }
-      return false
-    },
     attributes: {
       class: 'editor-content',
     },
