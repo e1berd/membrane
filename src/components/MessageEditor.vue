@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, onBeforeUnmount } from 'vue'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
@@ -44,7 +44,7 @@ const editor = useEditor({
       blockquote: false,
     }),
     Placeholder.configure({
-      placeholder: `Написать в #${props.channelName}...`,
+      placeholder: () => `Написать в #${props.channelName}...`,
     }),
     Underline,
   ],
@@ -63,24 +63,6 @@ const editor = useEditor({
   },
 })
 
-watch(() => props.channelName, (name) => {
-  editor.value?.extensionManager.extensions
-    .find(ext => ext.name === 'placeholder')
-    ?.options && editor.value?.setOptions({
-    extensions: [
-      StarterKit.configure({
-        heading: false,
-        codeBlock: false,
-        horizontalRule: false,
-        blockquote: false,
-      }),
-      Placeholder.configure({
-        placeholder: `Написать в #${name}...`,
-      }),
-      Underline,
-    ],
-  })
-})
 
 function handleSend() {
   if (!editor.value) return
