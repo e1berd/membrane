@@ -25,6 +25,7 @@ const userForDialog = computed(() => ({
   color: profile.value?.profile_color ?? 'primary',
   avatar_url: profile.value?.avatar_url ?? null,
   overlay_url: profile.value?.overlay_url ?? null,
+  bio: profile.value?.bio ?? null,
   email: '',
 }))
 </script>

@@ -14,6 +14,7 @@ export interface UserProfileInfo {
   color: string
   avatar_url?: string | null
   overlay_url?: string | null
+  bio?: string | null
   status?: 'online' | 'idle' | 'dnd' | 'offline'
   customStatus?: string
   role?: string
@@ -63,7 +64,7 @@ const statusColor: Record<string, string> = {
 </script>
 
 <template>
-  <v-dialog v-model="dialog" max-width="340">
+  <v-dialog v-model="dialog" max-width="400">
     <template #activator="{ props: activatorProps }">
       <slot name="activator" :props="activatorProps" />
     </template>
@@ -77,42 +78,51 @@ const statusColor: Record<string, string> = {
       />
 
       <div class="profile-avatar-wrapper">
-        <v-avatar size="72" :color="props.user.color">
+        <v-avatar size="84" :color="props.user.color">
           <v-img v-if="props.user.avatar_url" :src="props.user.avatar_url" />
           <span v-else class="text-h5 font-weight-medium">{{ props.user.avatar }}</span>
         </v-avatar>
       </div>
 
-      <v-card-text class="text-center pt-2 pb-4">
-        <div class="text-h6 font-weight-bold mb-1">{{ props.user.name }}</div>
+      <v-card-text class="px-4 pt-2 pb-4">
+        <div class="text-h6 font-weight-bold">{{ props.user.name }}</div>
 
-        <div v-if="props.user.email" class="text-body-2 text-on-surface-variant mb-2">
+        <div v-if="props.user.email" class="text-body-2 text-on-surface-variant mt-1">
           {{ props.user.email }}
         </div>
 
-        <div v-if="props.user.status" class="d-flex align-center justify-center gap-1 mb-2">
-          <v-icon
-            icon="mdi-circle"
-            :color="statusColor[props.user.status]"
-            size="10"
-          />
-          <span class="text-body-2 text-on-surface-variant">{{ statusLabel[props.user.status] }}</span>
+        <div class="d-flex align-center flex-wrap gap-2 mt-2">
+          <div v-if="props.user.status" class="d-flex align-center gap-1">
+            <v-icon
+              icon="mdi-circle"
+              :color="statusColor[props.user.status]"
+              size="10"
+            />
+            <span class="text-body-2 text-on-surface-variant">{{ statusLabel[props.user.status] }}</span>
+          </div>
+          <v-chip
+            v-if="props.user.role"
+            size="small"
+            variant="tonal"
+            color="primary"
+          >
+            {{ props.user.role }}
+          </v-chip>
         </div>
 
-        <v-chip
-          v-if="props.user.role"
-          size="small"
-          variant="tonal"
-          color="primary"
-          class="mb-2"
-        >
-          {{ props.user.role }}
-        </v-chip>
-
-        <div v-if="props.user.customStatus" class="text-body-2 text-on-surface-variant">
-          {{ props.user.customStatus }}
+        <div v-if="props.user.customStatus" class="d-flex align-center gap-1 mt-2">
+          <v-icon icon="mdi-emoticon-outline" size="14" color="on-surface-variant" />
+          <span class="text-body-2 text-on-surface-variant">{{ props.user.customStatus }}</span>
         </div>
       </v-card-text>
+
+      <template v-if="props.user.bio">
+        <v-divider />
+        <div class="px-4 py-3">
+          <div class="section-label text-on-surface-variant mb-2">О себе</div>
+          <div class="bio-container pa-3 text-body-2">{{ props.user.bio }}</div>
+        </div>
+      </template>
 
       <v-divider />
 
@@ -162,7 +172,7 @@ const statusColor: Record<string, string> = {
   overflow: hidden;
 
   .profile-banner {
-    block-size: 60px;
+    block-size: 96px;
     background: linear-gradient(
       135deg,
       rgb(var(--v-theme-primary)),
@@ -172,25 +182,31 @@ const statusColor: Record<string, string> = {
 
   .profile-avatar-wrapper {
     display: flex;
-    justify-content: center;
-    margin-block-start: -36px;
+    justify-content: flex-start;
+    padding-inline-start: 16px;
+    margin-block-start: -42px;
 
     .v-avatar {
       border: 4px solid rgb(var(--v-theme-surface));
     }
   }
 
-  .gap-1 {
-    gap: 4px;
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
-  .gap-2 {
-    gap: 8px;
+  .bio-container {
+    background: rgb(var(--v-theme-surface-container));
+    border-radius: 12px;
+    line-height: 1.6;
   }
 
-  .w-100 {
-    inline-size: 100%;
-  }
+  .gap-1 { gap: 4px; }
+  .gap-2 { gap: 8px; }
+  .w-100 { inline-size: 100%; }
 }
 
 @supports not (color: color-mix(in srgb, black 50%, transparent)) {
