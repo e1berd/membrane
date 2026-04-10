@@ -52,7 +52,7 @@ const offlineMembers = computed(() =>
   <div class="member-list py-3">
     <!-- Online / Active -->
     <div class="px-4 mb-1">
-      <span class="text-label-small font-weight-bold text-on-surface-variant text-uppercase">
+      <span class="text-truncate text-label-small font-weight-bold text-on-surface-variant text-uppercase">
         В сети — {{ onlineMembers.length }}
       </span>
     </div>
@@ -79,15 +79,15 @@ const offlineMembers = computed(() =>
           </v-badge>
         </template>
 
-        <v-list-item-title class="text-body-2">
+        <v-list-item-title class="text-body-2 text-truncate">
           {{ member.name }}
         </v-list-item-title>
-        <v-list-item-subtitle v-if="member.customStatus" class="text-caption">
+        <v-list-item-subtitle v-if="member.customStatus" class="text-caption text-truncate">
           {{ member.customStatus }}
         </v-list-item-subtitle>
 
         <template v-if="member.role" #append>
-          <v-chip size="x-small" variant="tonal" color="primary" class="ml-2">
+          <v-chip size="x-small" variant="tonal" color="primary" class="ml-2 text-truncate">
             {{ member.role }}
           </v-chip>
         </template>
@@ -96,7 +96,7 @@ const offlineMembers = computed(() =>
 
     <!-- Offline -->
     <div class="px-4 mt-4 mb-1">
-      <span class="text-label-small font-weight-bold text-on-surface-variant text-uppercase">
+      <span class="text-label-small font-weight-bold text-on-surface-variant text-uppercase text-truncate">
         Не в сети — {{ offlineMembers.length }}
       </span>
     </div>
@@ -123,10 +123,10 @@ const offlineMembers = computed(() =>
           </v-badge>
         </template>
 
-        <v-list-item-title class="text-body-2 text-on-surface-variant">
+        <v-list-item-title class="text-body-2 text-on-surface-variant text-truncate">
           {{ member.name }}
         </v-list-item-title>
-        <v-list-item-subtitle v-if="member.lastSeen" class="text-caption">
+        <v-list-item-subtitle v-if="member.lastSeen" class="text-caption text-truncate">
           {{ member.lastSeen }}
         </v-list-item-subtitle>
       </v-list-item>

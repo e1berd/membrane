@@ -7,9 +7,16 @@ export const settingsRoute = createRoute({
   component: defineAsyncComponent(() => import("@/views/SettingsView.vue")),
 })
 
-export const mainRoute = createRoute({
-  name: "main",
+const homeChatRoute = createRoute({
+  name: 'chat',
+  path: "/:chatId",
+  component: defineAsyncComponent(() => import("@/views/ChatsView.vue")),
+})
+
+export const homeRoute = createRoute({
+  name: "home",
   path: "/",
+  children: [homeChatRoute],
   component: defineAsyncComponent(() => import("@/views/ChatsView.vue")),
 })
 
@@ -25,4 +32,4 @@ export const errorRoute = createRoute({
   component: defineAsyncComponent(() => import('@/views/ErrorView.vue')),
 })
 
-export const routes = <const>[mainRoute, signInRoute, errorRoute, settingsRoute]
+export const routes = <const>[homeRoute, signInRoute, errorRoute, settingsRoute]

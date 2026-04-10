@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { ref, computed, nextTick, onMounted, watch, useTemplateRef } from 'vue'
+import { ref, computed, nextTick, onMounted, watch, useTemplateRef, defineAsyncComponent } from 'vue'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
 import type { OverlayScrollbarsComponentRef } from 'overlayscrollbars-vue'
 import 'overlayscrollbars/overlayscrollbars.css'
 import MessageItem from '@/components/MessageItem.vue'
 import type { ReplyInfo } from '@/components/MessageItem.vue'
 import MessageEditor from '@/components/MessageEditor.vue'
-import MemberList from '@/components/MemberList.vue'
+
+const MemberList = defineAsyncComponent(() => import('@/components/MemberList.vue'))
 
 const props = defineProps<{
   channel?: string
@@ -312,7 +313,6 @@ watch(() => props.channel, () => {
         />
       </OverlayScrollbarsComponent>
 
-      <!-- Message Editor -->
       <MessageEditor
         :channel-name="channelName"
         :reply-to="replyingTo"
@@ -321,9 +321,8 @@ watch(() => props.channel, () => {
       />
     </div>
 
-    <!-- Members Panel -->
     <v-expand-x-transition>
-      <div v-show="showMembers" class="members-panel flex-shrink-0">
+      <div v-if="showMembers" class="members-panel flex-shrink-0">
         <v-divider vertical />
         <MemberList />
       </div>
