@@ -3,7 +3,6 @@ import { ref, computed, onBeforeUnmount } from 'vue'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
-import Underline from '@tiptap/extension-underline'
 import type { ReplyInfo } from './MessageItem.vue'
 import EditorToolbar from './EditorToolbar.vue'
 
@@ -46,7 +45,6 @@ const editor = useEditor({
     Placeholder.configure({
       placeholder: () => `Написать в #${props.channelName}...`,
     }),
-    Underline,
   ],
   editorProps: {
     handleKeyDown(_view, event) {

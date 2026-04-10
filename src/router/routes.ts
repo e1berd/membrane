@@ -1,23 +1,31 @@
-import { createRoute } from "@kitbag/router"
-import { defineAsyncComponent } from "vue"
+import { createRoute } from '@kitbag/router'
+import { defineAsyncComponent } from 'vue'
+
+const ChatsView = defineAsyncComponent(() => import('@/views/ChatsView.vue'))
+
 
 export const settingsRoute = createRoute({
-  name: "settings",
-  path: "/settings",
-  component: defineAsyncComponent(() => import("@/views/SettingsView.vue")),
+  name: 'settings',
+  path: '/settings',
+  component: defineAsyncComponent(() => import('@/views/SettingsView.vue')),
 })
 
-
 export const homeRoute = createRoute({
-  name: "home",
-  path: "/[?chatId]",
-  component: defineAsyncComponent(() => import("@/views/ChatsView.vue")),
+  name: 'home',
+  path: '/[?chatId]',
+  component: ChatsView,
+})
+
+export const workspaceRoute = createRoute({
+  name: 'workspace',
+  path: '/workspace/[workspaceId]/[?chatId]',
+  component: ChatsView,
 })
 
 export const signInRoute = createRoute({
-  name: "iam",
-  path: "/iam",
-  component: defineAsyncComponent(() => import("@/views/IamView.vue")),
+  name: 'iam',
+  path: '/iam',
+  component: defineAsyncComponent(() => import('@/views/IamView.vue')),
 })
 
 export const errorRoute = createRoute({
@@ -26,4 +34,4 @@ export const errorRoute = createRoute({
   component: defineAsyncComponent(() => import('@/views/ErrorView.vue')),
 })
 
-export const routes = <const>[signInRoute, errorRoute, settingsRoute, homeRoute]
+export const routes = <const>[signInRoute, errorRoute, settingsRoute, homeRoute, workspaceRoute]

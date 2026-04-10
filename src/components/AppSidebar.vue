@@ -9,7 +9,7 @@ const UserProfileDialog = defineAsyncComponent(() => import('@/components/UserPr
 const router = useRouter()
 const activeDestination = ref('home')
 const workspaces = [
-  { name: 'Membrane', icon: 'mdi-alpha-m-box' },
+  { name: 'Membrane', icon: 'mdi-alpha-m-box', workspaceId: crypto.randomUUID() },
 ]
 
 const { profile, load } = useCurrentProfile()
@@ -74,7 +74,7 @@ const userForDialog = computed(() => ({
               :color="activeDestination === `ws-${i}` ? 'primary' : 'on-surface-variant'"
               :variant="activeDestination === `ws-${i}` ? 'tonal' : 'text'"
               rounded="lg"
-              @click="activeDestination = `ws-${i}`"
+              @click="activeDestination = `ws-${i}`, router.push(`/workspace/${ws.workspaceId}`)"
             />
           </template>
         </v-tooltip>

@@ -3,10 +3,9 @@ const THEME_PREFERENCE_KEY = 'membrane.theme.preference'
 export type ThemePreference = 'system' | 'light' | 'dark'
 
 type ThemeController = {
-  global: {
-    name: {
-      value: string
-    }
+  change: (theme: string) => void
+  current: {
+    value: string
   }
 }
 
@@ -19,7 +18,8 @@ function getSystemTheme(): 'light' | 'dark' {
 }
 
 function applyTheme(theme: ThemeController, preference: ThemePreference): void {
-  theme.global.name.value = preference === 'system' ? getSystemTheme() : preference
+  const themeName = preference === 'system' ? getSystemTheme() : preference
+  theme.change(themeName)
 }
 
 export function getThemePreference(): ThemePreference {
