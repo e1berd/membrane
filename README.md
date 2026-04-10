@@ -1,7 +1,13 @@
-# Tauri + Vue + TypeScript
+# Membrane
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Десктопное чат-приложение, построенное на **Tauri 2** с фронтендом на **Vue 3** и бэкендом **Supabase**.
 
-## Recommended IDE Setup
+## Запуск
 
-- [VS Code](https://code.visualstudio.com/) + [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+```bash
+git clone git@github.com:e1berd/membrane.git
+cd membrane
+pnpm install
+supabase start
+pnpm tauri dev
+```
