@@ -5,6 +5,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import Underline from '@tiptap/extension-underline'
 import type { ReplyInfo } from './MessageItem.vue'
+import EditorToolbar from './EditorToolbar.vue'
 
 const props = defineProps<{
   channelName: string
@@ -95,18 +96,6 @@ function insertEmoji(emoji: string) {
   editor.value?.commands.focus()
 }
 
-function toggleFormat(format: 'bold' | 'italic' | 'underline' | 'strike' | 'code') {
-  if (!editor.value) return
-  const chain = editor.value.chain().focus()
-  switch (format) {
-    case 'bold': chain.toggleBold().run(); break
-    case 'italic': chain.toggleItalic().run(); break
-    case 'underline': chain.toggleUnderline().run(); break
-    case 'strike': chain.toggleStrike().run(); break
-    case 'code': chain.toggleCode().run(); break
-  }
-}
-
 onBeforeUnmount(() => {
   editor.value?.destroy()
 })
@@ -139,57 +128,7 @@ onBeforeUnmount(() => {
         </div>
       </v-slide-y-transition>
 
-      <!-- <div class="d-flex align-center px-2 pt-2 toolbar-row">
-        <v-btn-group variant="text" density="compact" divided>
-          <v-btn
-            size="x-small"
-            icon="mdi-format-bold"
-            :color="editor?.isActive('bold') ? 'primary' : 'on-surface-variant'"
-            @click="toggleFormat('bold')"
-          />
-          <v-btn
-            size="x-small"
-            icon="mdi-format-italic"
-            :color="editor?.isActive('italic') ? 'primary' : 'on-surface-variant'"
-            @click="toggleFormat('italic')"
-          />
-          <v-btn
-            size="x-small"
-            icon="mdi-format-underline"
-            :color="editor?.isActive('underline') ? 'primary' : 'on-surface-variant'"
-            @click="toggleFormat('underline')"
-          />
-          <v-btn
-            size="x-small"
-            icon="mdi-format-strikethrough-variant"
-            :color="editor?.isActive('strike') ? 'primary' : 'on-surface-variant'"
-            @click="toggleFormat('strike')"
-          />
-          <v-btn
-            size="x-small"
-            icon="mdi-code-tags"
-            :color="editor?.isActive('code') ? 'primary' : 'on-surface-variant'"
-            @click="toggleFormat('code')"
-          />
-        </v-btn-group>
-
-        <v-divider vertical class="mx-1 my-1" />
-
-        <v-btn
-          size="x-small"
-          icon="mdi-format-list-bulleted"
-          variant="text"
-          color="on-surface-variant"
-          @click="editor?.chain().focus().toggleBulletList().run()"
-        />
-        <v-btn
-          size="x-small"
-          icon="mdi-format-list-numbered"
-          variant="text"
-          color="on-surface-variant"
-          @click="editor?.chain().focus().toggleOrderedList().run()"
-        />
-      </div> -->
+      <EditorToolbar :editor="editor" />
 
       <div class="px-3 py-2">
         <EditorContent :editor="editor" />
@@ -262,18 +201,15 @@ onBeforeUnmount(() => {
   flex-shrink: 0;
 }
 
-.toolbar-row {
-  gap: 2px;
-}
-
 .editor-card :deep(.editor-content) {
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.5;
   min-height: 36px;
   max-height: 160px;
   overflow-y: auto;
   outline: none;
   padding: 4px 0;
+  color: rgb(var(--v-theme-on-surface));
 }
 
 .editor-card :deep(.editor-content p) {
