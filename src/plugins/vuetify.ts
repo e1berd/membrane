@@ -46,6 +46,8 @@ export const vuetify = createVuetify({
           'inverse-on-surface': '#F5EFF7',
           'inverse-primary': '#D0BCFF',
           scrim: '#000000',
+          'selection-bg': '#EADDFF',
+          'selection-text': '#21005D',
         },
       },
       dark: {
@@ -83,6 +85,8 @@ export const vuetify = createVuetify({
           'inverse-on-surface': '#322F35',
           'inverse-primary': '#65558F',
           scrim: '#000000',
+          'selection-bg': '#4F378B',
+          'selection-text': '#EADDFF',
         },
       },
     },

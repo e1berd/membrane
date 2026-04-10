@@ -37,6 +37,25 @@ onUnmounted(() => {
   color-scheme: light dark;
 }
 
+::selection {
+  background-color: color-mix(in srgb, rgb(var(--v-theme-selection-bg)) 100%, transparent);
+  color: rgb(var(--v-theme-selection-text));
+}
+
+::-moz-selection {
+  background-color: color-mix(in srgb, rgb(var(--v-theme-selection-bg)) 100%, transparent);
+  color: rgb(var(--v-theme-selection-text));
+}
+
+@supports not (color: color-mix(in srgb, black 50%, transparent)) {
+  ::selection {
+    background-color: rgba(var(--v-theme-selection-bg), 0.40);
+  }
+  ::-moz-selection {
+    background-color: rgba(var(--v-theme-selection-bg), 0.40);
+  }
+}
+
 html,
 body {
   block-size: 100%;
