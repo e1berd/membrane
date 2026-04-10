@@ -49,6 +49,10 @@ function onReply() {
   showContextMenu.value = false
   emit('reply')
 }
+
+function copyMessageContent() {
+  navigator.clipboard.writeText(props.text)
+}
 </script>
 
 <template>
@@ -57,7 +61,6 @@ function onReply() {
     :class="{ 'pt-3': showHeader }"
     @contextmenu="onContextMenu"
   >
-    <!-- Reply reference -->
     <div v-if="replyTo" class="d-flex align-center gap-2 reply-reference ml-12 mb-1">
       <v-icon icon="mdi-reply" size="14" color="on-surface-variant" class="reply-icon" />
       <span class="text-caption font-weight-bold text-on-surface-variant">{{ replyTo.sender }}</span>
@@ -104,7 +107,7 @@ function onReply() {
           <v-list-item
             prepend-icon="mdi-content-copy"
             title="Копировать текст"
-            @click="showContextMenu = false"
+            @click="copyMessageContent"
           />
           <v-list-item
             prepend-icon="mdi-pin-outline"
