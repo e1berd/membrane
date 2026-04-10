@@ -176,7 +176,7 @@ const filteredDms = computed(() => {
           >
             <template #prepend>
               <v-badge
-                :color="dm.online ? 'success' : 'grey'"
+                :color="dm.online ? 'primary' : 'outline'"
                 dot
                 location="bottom end"
                 bordered

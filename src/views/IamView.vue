@@ -119,7 +119,7 @@ function onTabChange() {
 <template>
   <v-app>
     <v-main class="d-flex align-center justify-center">
-      <v-card width="400" class="pa-6">
+      <v-card width="400" class="pa-6" color="surface-container">
         <v-card-title class="text-h5 text-center mb-2">
           Membrane
         </v-card-title>

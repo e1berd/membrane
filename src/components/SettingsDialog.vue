@@ -7,8 +7,8 @@ const ProfilePage = defineAsyncComponent(() => import('@/components/settings/Set
 const AppearancePage = defineAsyncComponent(() => import('@/components/settings/SettingsAppearancePage.vue'))
 
 const categories = [
-  { id: 'profile', label: 'Профиль', icon: 'mdi-account-outline', component: ProfilePage },
   { id: 'appearance', label: 'Внешний вид', icon: 'mdi-palette-outline', component: AppearancePage },
+  { id: 'profile', label: 'Профиль', icon: 'mdi-account-outline', component: ProfilePage },
 ]
 
 const activeIndex = ref(0)

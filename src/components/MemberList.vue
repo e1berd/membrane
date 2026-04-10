@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent } from 'vue'
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
 
 const UserProfileDialog = defineAsyncComponent(() => import('@/components/UserProfileDialog.vue'))
 
@@ -51,7 +52,12 @@ const offlineMembers = computed(() =>
 </script>
 
 <template>
-  <div class="member-list py-3">
+  <OverlayScrollbarsComponent
+    class="member-list"
+    :options="{ scrollbars: { autoHide: 'scroll', theme: 'os-theme-membrane' } }"
+    defer
+  >
+  <div class="py-3">
     <!-- Online / Active -->
     <div class="px-4 mb-1">
       <span class="text-truncate text-label-small font-weight-bold text-on-surface-variant text-uppercase">
@@ -148,14 +154,13 @@ const offlineMembers = computed(() =>
       </UserProfileDialog>
     </v-list>
   </div>
+  </OverlayScrollbarsComponent>
 </template>
 
 <style scoped>
 .member-list {
-  height: 100%;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, rgb(var(--v-theme-on-surface)) 15%, transparent) transparent;
+  block-size: 100%;
+  overflow: hidden;
 
   .member-item {
     min-height: 42px;
@@ -174,9 +179,4 @@ const offlineMembers = computed(() =>
   }
 }
 
-@supports not (color: color-mix(in srgb, black 50%, transparent)) {
-  .member-list {
-    scrollbar-color: rgba(var(--v-theme-on-surface), 0.15) transparent;
-  }
-}
 </style>

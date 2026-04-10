@@ -23,7 +23,7 @@ const workspaces = [
   <v-navigation-drawer
     rail
     permanent
-    color="surface"
+    color="surface-container"
     class="workspace-rail"
     :width="68"
   >

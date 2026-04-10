@@ -38,7 +38,9 @@ async function loadProfile() {
   try {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-    const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+    const { data } = await supabase.from('profiles').select(
+      'username,avatar_url,overlay_url,profile_color,bio'
+    ).eq('id', user.id).single()
     if (data) {
       profile.value = {
         username: data.username ?? '',
@@ -83,102 +85,102 @@ loadProfile()
 </script>
 
 <template>
-  <div>
-  <div v-if="loading" class="d-flex justify-center align-center pa-8">
-    <v-progress-circular indeterminate color="primary" size="28" />
-  </div>
-
-  <template v-else>
-    <div class="profile-preview mx-4 mt-3 mb-3 rounded-xl overflow-hidden">
-      <div
-        class="profile-preview-banner"
-        :style="profile.overlay_url
-          ? { backgroundImage: `url(${profile.overlay_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-          : { backgroundColor: profile.profile_color }"
-      />
-      <div class="profile-preview-body px-3 py-2 d-flex align-center" style="gap: 8px">
-        <v-avatar size="40" class="preview-avatar" :style="{ backgroundColor: profile.profile_color }">
-          <v-img v-if="profile.avatar_url" :src="profile.avatar_url" />
-          <span v-else class="text-body-1 font-weight-medium text-white">{{ avatarInitial }}</span>
-        </v-avatar>
-        <div>
-          <div class="text-body-2 font-weight-bold">{{ profile.username || 'имя_пользователя' }}</div>
-          <div v-if="profile.bio" class="text-caption text-on-surface-variant">{{ profile.bio }}</div>
-        </div>
-      </div>
+  <form @submit.prevent="saveProfile">
+    <div v-if="loading" class="d-flex justify-center align-center pa-8">
+        <v-progress-circular indeterminate color="primary" size="28" />
     </div>
 
-    <div class="px-4">
-      <v-text-field
-        v-model="profile.username"
-        label="Имя пользователя"
-        density="compact"
-        variant="outlined"
-        class="mb-2"
-      />
-
-      <v-text-field
-        v-model="profile.bio"
-        label="О себе"
-        density="compact"
-        variant="outlined"
-        placeholder="Расскажите о себе..."
-        class="mb-3"
-      />
-
-      <div class="text-caption text-on-surface-variant mb-2">Цвет профиля</div>
-      <div class="color-swatches mb-3">
-        <button
-          v-for="color in profileColors"
-          :key="color"
-          type="button"
-          class="color-swatch"
-          :class="{ active: profile.profile_color === color }"
-          :style="{ backgroundColor: color }"
-          @click="profile.profile_color = color"
+    <template v-else>
+        <div class="profile-preview mx-4 mt-3 mb-3 rounded-xl overflow-hidden">
+        <div
+            class="profile-preview-banner"
+            :style="profile.overlay_url
+            ? { backgroundImage: `url(${profile.overlay_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+            : { backgroundColor: profile.profile_color }"
         />
-      </div>
+        <div class="profile-preview-body px-3 py-2 d-flex align-center" style="gap: 8px">
+            <v-avatar size="40" class="preview-avatar" :style="{ backgroundColor: profile.profile_color }">
+            <v-img v-if="profile.avatar_url" :src="profile.avatar_url" />
+            <span v-else class="text-body-1 font-weight-medium text-white">{{ avatarInitial }}</span>
+            </v-avatar>
+            <div>
+            <div class="text-body-2 font-weight-bold">{{ profile.username || 'имя_пользователя' }}</div>
+            <div v-if="profile.bio" class="text-caption text-on-surface-variant">{{ profile.bio }}</div>
+            </div>
+        </div>
+        </div>
 
-      <v-text-field
-        v-model="profile.avatar_url"
-        label="Ссылка на аватарку"
-        density="compact"
-        variant="outlined"
-        placeholder="https://..."
-        class="mb-2"
-      />
+        <div class="px-4">
+        <v-text-field
+            v-model="profile.username"
+            label="Имя пользователя"
+            density="compact"
+            variant="outlined"
+            class="mb-2"
+        />
 
-      <v-text-field
-        v-model="profile.overlay_url"
-        label="Фон профиля (overlay)"
-        density="compact"
-        variant="outlined"
-        placeholder="https://..."
-      />
-    </div>
+        <v-text-field
+            v-model="profile.bio"
+            label="О себе"
+            density="compact"
+            variant="outlined"
+            placeholder="Расскажите о себе..."
+            class="mb-3"
+        />
 
-    <div class="page-footer px-4 py-3">
-      <v-alert
-        v-if="error"
-        type="error"
-        density="compact"
-        variant="tonal"
-        class="mb-2"
-        :text="error"
-      />
-      <v-btn
-        color="primary"
-        variant="tonal"
-        block
-        :loading="saving"
-        :prepend-icon="success ? 'mdi-check' : undefined"
-        @click="saveProfile"
-      >
-        {{ success ? 'Сохранено' : 'Сохранить' }}
-      </v-btn>
-    </div>
-  </template>
-  </div>
+        <div class="text-caption text-on-surface-variant mb-2">Цвет профиля</div>
+        <div class="color-swatches mb-3">
+            <button
+            v-for="color in profileColors"
+            :key="color"
+            type="button"
+            class="color-swatch"
+            :class="{ active: profile.profile_color === color }"
+            :style="{ backgroundColor: color }"
+            @click="profile.profile_color = color"
+            />
+        </div>
+
+        <v-text-field
+            v-model="profile.avatar_url"
+            label="Ссылка на аватарку"
+            density="compact"
+            variant="outlined"
+            placeholder="https://..."
+            class="mb-2"
+        />
+
+        <v-text-field
+            v-model="profile.overlay_url"
+            label="Фон профиля (overlay)"
+            density="compact"
+            variant="outlined"
+            placeholder="https://..."
+        />
+        </div>
+
+        <div class="page-footer px-4 py-3">
+        <v-alert
+            v-if="error"
+            type="error"
+            density="compact"
+            variant="tonal"
+            class="mb-2"
+            :text="error"
+        />
+        <v-btn
+            color="primary"
+            variant="tonal"
+            block
+            :loading="saving"
+            :prepend-icon="success ? 'mdi-check' : undefined"
+            type="submit"
+        >
+            {{ success ? 'Сохранено' : 'Сохранить' }}
+        </v-btn>
+        </div>
+    </template>
+  </form>
 </template>
 
 <style scoped>
