@@ -3,10 +3,10 @@ import { defineAsyncComponent, ref } from 'vue'
 
 const SettingsDialog = defineAsyncComponent(() => import('@/components/SettingsDialog.vue'))
 
-const activeWorkspace = ref(0)
+const activeDestination = ref('home')
 
 const workspaces = [
-  { name: 'Membrane', icon: 'mdi-alpha-m-box', color: 'primary' },
+  { name: 'Membrane', icon: 'mdi-alpha-m-box' },
 ]
 </script>
 
@@ -18,39 +18,62 @@ const workspaces = [
     class="workspace-rail"
     :width="68"
   >
-    <div class="d-flex flex-column align-center pt-3 gap-2">
-      <v-tooltip
-        v-for="(ws, i) in workspaces"
-        :key="i"
-        :text="ws.name"
-        location="end"
-      >
-        <template #activator="{ props }">
-          <v-btn
-            v-bind="props"
-            :icon="ws.icon"
-            :color="activeWorkspace === i ? 'primary' : 'surface-variant'"
-            :variant="activeWorkspace === i ? 'tonal' : 'text'"
-            rounded="lg"
-            @click="activeWorkspace = i"
-          />
-        </template>
-      </v-tooltip>
+    <div class="rail-content">
+      <div class="rail-group">
+        <v-tooltip text="Home" location="end">
+          <template #activator="{ props }">
+            <v-btn
+              v-bind="props"
+              icon="mdi-home"
+              class="rail-btn"
+              :color="activeDestination === 'home' ? 'primary' : 'on-surface-variant'"
+              :variant="activeDestination === 'home' ? 'tonal' : 'text'"
+              rounded="lg"
+              @click="activeDestination = 'home'"
+            />
+          </template>
+        </v-tooltip>
+      </div>
 
-      <v-divider class="my-1" style="width: 36px" />
+      <v-divider class="rail-divider" />
 
-      <v-tooltip text="Добавить пространство" location="end">
+      <div class="rail-group">
+        <v-tooltip
+          v-for="(ws, i) in workspaces"
+          :key="i"
+          :text="ws.name"
+          location="end"
+        >
+          <template #activator="{ props }">
+            <v-btn
+              v-bind="props"
+              :icon="ws.icon"
+              class="rail-btn"
+              :color="activeDestination === `ws-${i}` ? 'primary' : 'on-surface-variant'"
+              :variant="activeDestination === `ws-${i}` ? 'tonal' : 'text'"
+              rounded="lg"
+              @click="activeDestination = `ws-${i}`"
+            />
+          </template>
+        </v-tooltip>
+      </div>
+
+      <v-divider class="rail-divider" />
+
+      <div class="rail-group">
+        <v-tooltip text="Добавить пространство" location="end">
         <template #activator="{ props }">
           <v-btn
             v-bind="props"
             icon="mdi-plus"
-            variant="outlined"
-            size="small"
-            rounded="lg"
+            class="rail-btn"
             color="on-surface-variant"
+            variant="text"
+            rounded="lg"
           />
         </template>
       </v-tooltip>
+      </div>
     </div>
 
     <template #append>
@@ -71,7 +94,28 @@ const workspaces = [
   z-index: 1001;
 }
 
-.gap-2 {
+.rail-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0;
   gap: 8px;
+}
+
+.rail-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.rail-divider {
+  width: 40px;
+}
+
+.rail-btn {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
 }
 </style>
