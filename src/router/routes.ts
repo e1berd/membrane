@@ -7,16 +7,10 @@ export const settingsRoute = createRoute({
   component: defineAsyncComponent(() => import("@/views/SettingsView.vue")),
 })
 
-const homeChatRoute = createRoute({
-  name: 'chat',
-  path: "/:chatId",
-  component: defineAsyncComponent(() => import("@/views/ChatsView.vue")),
-})
 
 export const homeRoute = createRoute({
   name: "home",
-  path: "/",
-  children: [homeChatRoute],
+  path: "/[?chatId]",
   component: defineAsyncComponent(() => import("@/views/ChatsView.vue")),
 })
 

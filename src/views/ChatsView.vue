@@ -249,9 +249,7 @@ watch(() => props.channel, () => {
 
 <template>
   <div class="chat-view d-flex" style="height: 100vh">
-    <!-- Main Chat Column -->
     <div class="d-flex flex-column flex-grow-1 min-width-0">
-      <!-- Channel Header -->
       <v-toolbar
         density="comfortable"
         color="surface"
