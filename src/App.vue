@@ -1,10 +1,30 @@
 <script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue'
 import AppSidebar from '@/components/AppSidebar.vue'
+import { supabase } from '@/lib/supabase'
+import type { Subscription } from '@supabase/supabase-js'
+
+const hasSession = ref(false)
+let authListener: Subscription
+
+onMounted(async () => {
+  const { data } = await supabase.auth.getSession()
+  hasSession.value = !!data.session
+
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    hasSession.value = !!session
+  })
+  authListener = subscription
+})
+
+onUnmounted(() => {
+  authListener?.unsubscribe()
+})
 </script>
 
 <template>
   <v-app>
-    <AppSidebar />
+    <AppSidebar v-if="hasSession" />
 
     <v-main class="main-content">
       <router-view />

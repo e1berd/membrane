@@ -26,4 +26,4 @@ export const errorRoute = createRoute({
   component: defineAsyncComponent(() => import('@/views/ErrorView.vue')),
 })
 
-export const routes = <const>[homeRoute, signInRoute, errorRoute, settingsRoute]
+export const routes = <const>[signInRoute, errorRoute, settingsRoute, homeRoute]

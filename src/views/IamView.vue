@@ -139,6 +139,7 @@ function onTabChange() {
                 prepend-inner-icon="mdi-email-outline"
                 :error-messages="errors.email"
                 class="mb-2"
+                autofocus
               />
 
               <v-text-field
