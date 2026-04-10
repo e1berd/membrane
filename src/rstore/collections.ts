@@ -7,6 +7,8 @@ export interface Profile {
   username: string
   avatar_url: string | null
   bio: string | null
+  profile_color: string | null
+  overlay_url: string | null
   updated_at: string | null
   created_at: string
 }
@@ -33,6 +35,8 @@ export const profiles = withItemType<Profile>().defineCollection({
       username: z.string().min(1, 'Имя пользователя обязательно').max(255).optional(),
       avatar_url: z.string().url().nullable().optional(),
       bio: z.string().max(255).nullable().optional(),
+      profile_color: z.string().max(7).nullable().optional(),
+      overlay_url: z.string().url().nullable().optional(),
     }),
   },
 } as const)

@@ -1,24 +1,20 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useTheme } from 'vuetify'
-import { getThemePreference, setThemePreference, type ThemePreference } from '@/lib/theme'
+import { ref, computed, defineAsyncComponent } from 'vue'
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
+import 'overlayscrollbars/overlayscrollbars.css'
 
-const theme = useTheme()
-const themePreference = ref<ThemePreference>(getThemePreference())
-
-function updateThemePreference(value: ThemePreference | null): void {
-  if (value == null) return
-  themePreference.value = value
-  setThemePreference(theme, value)
-}
+const ProfilePage = defineAsyncComponent(() => import('@/components/settings/SettingsProfilePage.vue'))
+const AppearancePage = defineAsyncComponent(() => import('@/components/settings/SettingsAppearancePage.vue'))
 
 const categories = [
-  { id: 'appearance', label: 'Внешний вид', icon: 'mdi-palette-outline' },
+  { id: 'profile', label: 'Профиль', icon: 'mdi-account-outline', component: ProfilePage },
+  { id: 'appearance', label: 'Внешний вид', icon: 'mdi-palette-outline', component: AppearancePage },
 ]
 
 const activeIndex = ref(0)
 const prevIndex = ref(0)
 const activeId = computed(() => categories[activeIndex.value].id)
+const currentComponent = computed(() => categories[activeIndex.value].component)
 
 const transitionName = computed(() =>
   activeIndex.value > prevIndex.value ? 'slide-up' : 'slide-down'
@@ -34,21 +30,11 @@ function selectCategory(index: number) {
 <template>
   <v-dialog max-width="600">
     <template #activator="{ props }">
-      <v-tooltip text="Настройки" location="end">
-        <template #activator="{ props: tooltipProps }">
-          <v-btn
-            v-bind="{ ...tooltipProps, ...props }"
-            icon="mdi-cog-outline"
-            variant="text"
-            size="small"
-            color="on-surface-variant"
-          />
-        </template>
-      </v-tooltip>
+      <slot :props="props" name="activator" />
     </template>
 
     <template #default="{ isActive }">
-      <v-card class="settings-card" height="420">
+      <v-card class="settings-card" height="500">
         <div class="settings-layout">
           <div class="settings-sidebar">
             <div class="settings-sidebar-header px-4 pt-4 pb-3">
@@ -84,33 +70,15 @@ function selectCategory(index: number) {
 
             <v-divider />
 
-            <div class="settings-content-body">
+            <OverlayScrollbarsComponent
+              class="settings-body"
+              :options="{ scrollbars: { autoHide: 'scroll', theme: 'os-theme-membrane' } }"
+              defer
+            >
               <transition :name="transitionName" mode="out-in">
-                <div :key="activeId">
-                  <template v-if="activeId === 'appearance'">
-                    <v-list class="px-2 pt-2">
-                      <v-list-item rounded="lg" prepend-icon="mdi-theme-light-dark">
-                        <v-list-item-title>Тема приложения</v-list-item-title>
-                        <v-list-item-subtitle>Выберите режим оформления</v-list-item-subtitle>
-                      </v-list-item>
-                      <div class="px-4 pt-2">
-                        <v-btn-toggle
-                          :model-value="themePreference"
-                          color="primary"
-                          density="comfortable"
-                          mandatory
-                          @update:model-value="updateThemePreference"
-                        >
-                          <v-btn value="system">Системная</v-btn>
-                          <v-btn value="light">Светлая</v-btn>
-                          <v-btn value="dark">Тёмная</v-btn>
-                        </v-btn-toggle>
-                      </div>
-                    </v-list>
-                  </template>
-                </div>
+                <component :is="currentComponent" :key="activeId" />
               </transition>
-            </div>
+            </OverlayScrollbarsComponent>
           </div>
         </div>
       </v-card>
@@ -144,29 +112,13 @@ function selectCategory(index: number) {
     min-inline-size: 0;
   }
 
-  .settings-content-body {
+  .settings-body {
     flex: 1;
     overflow: hidden;
-    position: relative;
-
-    > div {
-      position: absolute;
-      inset: 0;
-      overflow-y: auto;
-      text-wrap: pretty;
-    }
   }
 
   :deep(.v-list-item) {
     --v-list-prepend-gap: 8px;
-  }
-
-  :deep(.v-btn-group) {
-    inline-size: 100%;
-
-    .v-btn {
-      flex: 1;
-    }
   }
 }
 

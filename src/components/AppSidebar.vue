@@ -87,7 +87,21 @@ const workspaces = [
 
     <template #append>
       <div class="rail-append">
-        <SettingsDialog />
+        <SettingsDialog>
+          <template #activator="{ props }">
+            <v-tooltip text="Настройки" location="end">
+              <template #activator="{ props: tooltipProps }">
+                <v-btn
+                  v-bind="{ ...tooltipProps, ...props }"
+                  icon="mdi-cog-outline"
+                  variant="text"
+                  size="small"
+                  color="on-surface-variant"
+                />
+              </template>
+            </v-tooltip>
+          </template>
+        </SettingsDialog>
 
         <UserProfileDialog :user="currentUser" is-current-user>
           <template #activator="{ props: profileProps }">
