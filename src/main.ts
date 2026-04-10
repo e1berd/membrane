@@ -12,7 +12,7 @@ let currentWindow: ReturnType<typeof getCurrentWindow>
 
 async function healthCheck(): Promise<boolean> {
   try {
-    const { error } = await supabase.from('profiles').select('id').limit(1)
+    const { error } = await supabase.rpc('health_check')
     return !error
   } catch {
     return false
