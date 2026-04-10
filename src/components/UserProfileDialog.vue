@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { openIamWindow } from '@/lib/windows'
 import { getCurrentWindow } from '@tauri-apps/api/window'
+import { useCurrentProfile } from '@/composables/useCurrentProfile'
 
 export interface UserProfileInfo {
   name: string
@@ -26,6 +27,8 @@ async function handleLogout() {
   loggingOut.value = true
   try {
     await supabase.auth.signOut()
+    const { reset } = useCurrentProfile()
+    reset()
     const mainWindow = getCurrentWindow()
     await mainWindow.hide()
     await openIamWindow()

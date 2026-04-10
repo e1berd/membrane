@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, useTemplateRef } from 'vue'
 import { supabase } from '@/lib/supabase'
+import { useCurrentProfile } from '@/composables/useCurrentProfile'
 
 interface ProfileForm {
   username: string
@@ -28,6 +29,8 @@ const uploadError = ref<string | null>(null)
 
 const avatarInput = useTemplateRef<HTMLInputElement>('avatarInput')
 const overlayInput = useTemplateRef<HTMLInputElement>('overlayInput')
+
+const { patch } = useCurrentProfile()
 
 const profileColors = [
   '#5c6bc0', '#1976d2', '#0288d1', '#00897b',
@@ -83,13 +86,22 @@ async function uploadMedia(file: File, slot: 'avatar' | 'overlay'): Promise<stri
   return `${publicUrl}?t=${Date.now()}`
 }
 
+async function persistField(field: 'avatar_url' | 'overlay_url', value: string) {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  await supabase.from('profiles').update({ [field]: value, updated_at: new Date().toISOString() }).eq('id', user.id)
+  patch({ [field]: value })
+}
+
 async function onAvatarChange(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (!file) return
   uploadingAvatar.value = true
   uploadError.value = null
   try {
-    profile.value.avatar_url = await uploadMedia(file, 'avatar')
+    const url = await uploadMedia(file, 'avatar')
+    profile.value.avatar_url = url
+    await persistField('avatar_url', url)
   } catch (err: any) {
     uploadError.value = err.message
   } finally {
@@ -104,7 +116,9 @@ async function onOverlayChange(e: Event) {
   uploadingOverlay.value = true
   uploadError.value = null
   try {
-    profile.value.overlay_url = await uploadMedia(file, 'overlay')
+    const url = await uploadMedia(file, 'overlay')
+    profile.value.overlay_url = url
+    await persistField('overlay_url', url)
   } catch (err: any) {
     uploadError.value = err.message
   } finally {
@@ -131,6 +145,11 @@ async function saveProfile() {
     if (err) {
       error.value = err.message
     } else {
+      patch({
+        username: profile.value.username,
+        profile_color: profile.value.profile_color || null,
+        bio: profile.value.bio || null,
+      })
       success.value = true
       setTimeout(() => { success.value = false }, 2000)
     }

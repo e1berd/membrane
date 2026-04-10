@@ -1,22 +1,29 @@
 <script setup lang="ts">
-import { defineAsyncComponent, ref } from 'vue'
+import { defineAsyncComponent, ref, computed, onMounted } from 'vue'
+import { useCurrentProfile } from '@/composables/useCurrentProfile'
 
 const SettingsDialog = defineAsyncComponent(() => import('@/components/SettingsDialog.vue'))
 const UserProfileDialog = defineAsyncComponent(() => import('@/components/UserProfileDialog.vue'))
 
 const activeDestination = ref('home')
-
-const currentUser = {
-  name: 'User',
-  avatar: 'U',
-  color: 'primary',
-  status: 'online' as const,
-  email: 'user@example.com',
-}
-
 const workspaces = [
   { name: 'Membrane', icon: 'mdi-alpha-m-box' },
 ]
+
+const { profile, load } = useCurrentProfile()
+
+onMounted(() => load())
+
+const avatarInitial = computed(() =>
+  profile.value?.username ? profile.value.username.charAt(0).toUpperCase() : '?'
+)
+
+const userForDialog = computed(() => ({
+  name: profile.value?.username ?? '',
+  avatar: avatarInitial.value,
+  color: profile.value?.profile_color ?? 'primary',
+  email: '',
+}))
 </script>
 
 <template>
@@ -103,15 +110,16 @@ const workspaces = [
           </template>
         </SettingsDialog>
 
-        <UserProfileDialog :user="currentUser" is-current-user>
+        <UserProfileDialog :user="userForDialog" is-current-user>
           <template #activator="{ props: profileProps }">
             <v-avatar
               v-bind="profileProps"
               size="36"
-              color="primary"
+              :color="profile?.profile_color ?? 'primary'"
               class="cursor-pointer"
             >
-              <span class="text-body-2 font-weight-medium">U</span>
+              <v-img v-if="profile?.avatar_url" :src="profile.avatar_url" />
+              <span v-else class="text-body-2 font-weight-medium">{{ avatarInitial }}</span>
             </v-avatar>
           </template>
         </UserProfileDialog>
