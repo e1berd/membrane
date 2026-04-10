@@ -1,39 +1,38 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import AppSidebar from '@/components/AppSidebar.vue'
+import ChannelList from '@/components/ChannelList.vue'
+import { ref } from 'vue'
 
-const showMenu = ref(false)
+const currentChannel = ref('general')
 
-const menuItems = [
-  { icon: 'mdi-cog', title: 'Настройки', action: 'settings' },
-]
-
+function onChannelSelect(channel: string) {
+  currentChannel.value = channel
+}
 </script>
 
 <template>
   <v-app>
-    <AppSidebar ref="sidebarRef" />
+    <AppSidebar />
 
-    <v-navigation-drawer
-      v-model="showMenu"
-      location="right"
-      temporary
-      width="300"
-    >
-      <v-list density="compact" nav>
-        <v-list-subheader>Меню</v-list-subheader>
+    <ChannelList
+      :selected="currentChannel"
+      @select="onChannelSelect"
+    />
 
-        <v-list-item
-          v-for="item in menuItems"
-          :key="item.icon"
-          :prepend-icon="item.icon"
-          :title="item.title"
-        />
-      </v-list>
-    </v-navigation-drawer>
-
-    <v-main>
-      <router-view />
+    <v-main class="main-content">
+      <router-view :channel="currentChannel" />
     </v-main>
   </v-app>
 </template>
+
+<style>
+html, body {
+  overflow: hidden;
+  height: 100%;
+}
+
+.main-content {
+  margin-left: 328px !important;
+  height: 100vh;
+}
+</style>

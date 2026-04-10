@@ -11,9 +11,6 @@ export const mainRoute = createRoute({
   name: "main",
   path: "/",
   component: defineAsyncComponent(() => import("@/views/ChatsView.vue")),
-  children: [
-    settingsRoute,
-  ],
 })
 
 export const signInRoute = createRoute({
