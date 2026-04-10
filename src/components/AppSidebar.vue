@@ -77,7 +77,7 @@ const workspaces = [
     </div>
 
     <template #append>
-      <div class="d-flex flex-column align-center pb-3 gap-2">
+      <div class="rail-append">
         <SettingsDialog />
 
         <v-avatar size="36" color="primary">
@@ -117,5 +117,13 @@ const workspaces = [
   width: 44px;
   height: 44px;
   min-width: 44px;
+}
+
+.rail-append {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 12px;
 }
 </style>
