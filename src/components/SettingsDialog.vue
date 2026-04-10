@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useTheme } from 'vuetify'
+import { getThemePreference, setThemePreference, type ThemePreference } from '@/lib/theme'
 
 const theme = useTheme()
-const isDark = ref(theme.global.name.value === 'dark')
+const themePreference = ref<ThemePreference>(getThemePreference())
 
-function toggleTheme() {
-  theme.global.name.value = isDark.value ? 'dark' : 'light'
+function updateThemePreference(value: ThemePreference | null): void {
+  if (value == null) return
+  themePreference.value = value
+  setThemePreference(theme, value)
 }
 
 const categories = [
@@ -86,24 +89,25 @@ function selectCategory(index: number) {
                 <div :key="activeId">
                   <template v-if="activeId === 'appearance'">
                     <v-list class="px-2 pt-2">
-                      <v-list-item
-                        rounded="lg"
-                        prepend-icon="mdi-weather-night"
-                        @click="isDark = !isDark; toggleTheme()"
-                      >
-                        <v-list-item-title>Тёмная тема</v-list-item-title>
-                        <template #append>
-                          <v-switch
-                            v-model="isDark"
-                            hide-details
-                            inset
-                            density="compact"
-                            tabindex="-1"
-                            @click.stop
-                            @update:model-value="toggleTheme"
-                          />
-                        </template>
+                      <v-list-item rounded="lg" prepend-icon="mdi-theme-light-dark">
+                        <v-list-item-title>Тема приложения</v-list-item-title>
+                        <v-list-item-subtitle>Выберите режим оформления</v-list-item-subtitle>
                       </v-list-item>
+                      <div class="px-4 pt-2">
+                        <v-btn-toggle
+                          :model-value="themePreference"
+                          color="primary"
+                          density="comfortable"
+                          mandatory
+                          rounded="xl"
+                          divided
+                          @update:model-value="updateThemePreference"
+                        >
+                          <v-btn value="system">Системная</v-btn>
+                          <v-btn value="light">Светлая</v-btn>
+                          <v-btn value="dark">Тёмная</v-btn>
+                        </v-btn-toggle>
+                      </div>
                     </v-list>
                   </template>
                 </div>
@@ -182,5 +186,13 @@ function selectCategory(index: number) {
 
 :deep(.v-list-item) {
   --v-list-prepend-gap: 8px;
+}
+
+:deep(.v-btn-group) {
+  width: 100%;
+}
+
+:deep(.v-btn-group .v-btn) {
+  flex: 1;
 }
 </style>

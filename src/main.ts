@@ -7,6 +7,7 @@ import { listen } from '@tauri-apps/api/event'
 import { router } from './router'
 import { vuetify } from '@/plugins/vuetify'
 import { setupRstore } from '@/rstore'
+import { initializeTheme } from '@/lib/theme'
 
 let currentWindow: ReturnType<typeof getCurrentWindow>
 
@@ -25,6 +26,7 @@ async function initializeApp() {
   const app = createApp(App)
   app.use(router).use(vuetify)
   await setupRstore(app)
+  initializeTheme(vuetify.theme)
   app.mount('#app')
 
   if (currentWindow.label === 'main') {
