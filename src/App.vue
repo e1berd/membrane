@@ -32,7 +32,7 @@ html, body {
 }
 
 .main-content {
-  margin-left: 328px !important;
+  /*margin-left: 328px !important;*/
   height: 100vh;
 }
 </style>
