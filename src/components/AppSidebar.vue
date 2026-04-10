@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import SettingsDialog from '@/components/SettingsDialog.vue'
 
 const activeWorkspace = ref(0)
 
@@ -53,17 +54,7 @@ const workspaces = [
 
     <template #append>
       <div class="d-flex flex-column align-center pb-3 gap-2">
-        <v-tooltip text="Настройки" location="end">
-          <template #activator="{ props }">
-            <v-btn
-              v-bind="props"
-              icon="mdi-cog-outline"
-              variant="text"
-              size="small"
-              color="on-surface-variant"
-            />
-          </template>
-        </v-tooltip>
+        <SettingsDialog />
 
         <v-avatar size="36" color="primary">
           <span class="text-body-2 font-weight-medium">U</span>
