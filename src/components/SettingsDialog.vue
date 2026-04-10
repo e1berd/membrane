@@ -98,6 +98,7 @@ function selectCategory(index: number) {
                             hide-details
                             inset
                             density="compact"
+                            tabindex="-1"
                             @click.stop
                             @update:model-value="toggleTheme"
                           />
