@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { defineAsyncComponent, ref, computed, onMounted } from 'vue'
 import { useCurrentProfile } from '@/composables/useCurrentProfile'
+import { useRouter } from '@kitbag/router'
 
 const SettingsDialog = defineAsyncComponent(() => import('@/components/SettingsDialog.vue'))
 const UserProfileDialog = defineAsyncComponent(() => import('@/components/UserProfileDialog.vue'))
 
+const router = useRouter()
 const activeDestination = ref('home')
 const workspaces = [
   { name: 'Membrane', icon: 'mdi-alpha-m-box' },
@@ -49,7 +51,7 @@ const userForDialog = computed(() => ({
               :color="activeDestination === 'home' ? 'primary' : 'on-surface-variant'"
               :variant="activeDestination === 'home' ? 'tonal' : 'text'"
               rounded="lg"
-              @click="activeDestination = 'home'"
+              @click="activeDestination = 'home', router.push('/')"
             />
           </template>
         </v-tooltip>

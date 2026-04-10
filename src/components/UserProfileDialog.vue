@@ -84,14 +84,14 @@ const statusColor: Record<string, string> = {
         </v-avatar>
       </div>
 
-      <v-card-text class="px-4 pt-2 pb-4">
+      <v-card-text class="px-4 pt-2 pb-3">
         <div class="text-h6 font-weight-bold">{{ props.user.name }}</div>
 
-        <div v-if="props.user.email" class="text-body-2 text-on-surface-variant mt-1">
+        <div v-if="props.user.email" class="text-caption text-on-surface-variant mt-1">
           {{ props.user.email }}
         </div>
 
-        <div class="d-flex align-center flex-wrap gap-2 mt-2">
+        <div class="d-flex align-center flex-wrap gap-2 mt-1">
           <div v-if="props.user.status" class="d-flex align-center gap-1">
             <v-icon
               icon="mdi-circle"
@@ -110,19 +110,17 @@ const statusColor: Record<string, string> = {
           </v-chip>
         </div>
 
-        <div v-if="props.user.customStatus" class="d-flex align-center gap-1 mt-2">
+        <div v-if="props.user.customStatus" class="d-flex align-center gap-1 mt-1">
           <v-icon icon="mdi-emoticon-outline" size="14" color="on-surface-variant" />
           <span class="text-body-2 text-on-surface-variant">{{ props.user.customStatus }}</span>
         </div>
-      </v-card-text>
 
-      <template v-if="props.user.bio">
-        <v-divider />
-        <div class="px-4 py-3">
-          <div class="section-label text-on-surface-variant mb-2">О себе</div>
-          <div class="bio-container pa-3 text-body-2">{{ props.user.bio }}</div>
-        </div>
-      </template>
+        <template v-if="props.user.bio">
+          <v-divider class="my-3" />
+          <div class="section-label text-on-surface-variant mb-1">О себе</div>
+          <div class="text-body-2">{{ props.user.bio }}</div>
+        </template>
+      </v-card-text>
 
       <v-divider />
 
@@ -196,12 +194,6 @@ const statusColor: Record<string, string> = {
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-  }
-
-  .bio-container {
-    background: rgb(var(--v-theme-surface-container));
-    border-radius: 12px;
-    line-height: 1.6;
   }
 
   .gap-1 { gap: 4px; }

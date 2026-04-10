@@ -4,10 +4,10 @@ import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
 import type { OverlayScrollbarsComponentRef } from 'overlayscrollbars-vue'
 import 'overlayscrollbars/overlayscrollbars.css'
 import type { ReplyInfo } from '@/components/MessageItem.vue'
-import MessageEditor from '@/components/MessageEditor.vue'
-import ChatMessagesList from '@/components/ChatMessagesList.vue'
 
 const MemberList = defineAsyncComponent(() => import('@/components/MemberList.vue'))
+const ChatMessagesList = defineAsyncComponent(() => import('@/components/ChatMessagesList.vue'))
+const MessageEditor = defineAsyncComponent(() => import('@/components/MessageEditor.vue'))
 
 const props = defineProps<{
   chatId?: string
