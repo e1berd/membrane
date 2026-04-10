@@ -5,7 +5,7 @@ import { ref } from 'vue'
 
 const currentChannel = ref('general')
 
-function onChannelSelect(channel: string) {
+function selectChannel(channel: string) {
   currentChannel.value = channel
 }
 </script>
@@ -16,7 +16,7 @@ function onChannelSelect(channel: string) {
 
     <ChannelList
       :selected="currentChannel"
-      @select="onChannelSelect"
+      @select="selectChannel"
     />
 
     <v-main class="main-content">
@@ -32,7 +32,6 @@ html, body {
 }
 
 .main-content {
-  /*margin-left: 328px !important;*/
-  height: 100vh;
+  height: 100dvh;
 }
 </style>

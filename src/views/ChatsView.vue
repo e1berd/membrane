@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, nextTick, onMounted, watch } from 'vue'
 import MessageItem from '@/components/MessageItem.vue'
+import type { ReplyInfo } from '@/components/MessageItem.vue'
 import MessageEditor from '@/components/MessageEditor.vue'
 import MemberList from '@/components/MemberList.vue'
 
@@ -39,6 +40,21 @@ interface ChatMessage {
   text: string
   time: string
   color: string
+  replyTo?: ReplyInfo
+}
+
+const replyingTo = ref<ReplyInfo | null>(null)
+
+function onReply(msg: ChatMessage) {
+  replyingTo.value = {
+    id: msg.id,
+    sender: msg.sender,
+    text: msg.text,
+  }
+}
+
+function cancelReply() {
+  replyingTo.value = null
 }
 
 const messages = ref<ChatMessage[]>([
@@ -200,7 +216,9 @@ function onSend(html: string) {
     text: html,
     time: new Date().toISOString(),
     color: 'primary',
+    replyTo: replyingTo.value ?? undefined,
   })
+  replyingTo.value = null
   scrollToBottom()
 }
 
@@ -268,11 +286,18 @@ watch(() => props.channel, () => {
           :time="msg.time"
           :color="msg.color"
           :show-header="shouldShowHeader(index)"
+          :reply-to="msg.replyTo"
+          @reply="onReply(msg)"
         />
       </div>
 
       <!-- Message Editor -->
-      <MessageEditor :channel-name="channelName" @send="onSend" />
+      <MessageEditor
+        :channel-name="channelName"
+        :reply-to="replyingTo"
+        @send="onSend"
+        @cancel-reply="cancelReply"
+      />
     </div>
 
     <!-- Members Panel -->

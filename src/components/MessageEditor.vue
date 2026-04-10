@@ -1,17 +1,28 @@
 <script setup lang="ts">
-import { ref, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, onBeforeUnmount, watch } from 'vue'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import Underline from '@tiptap/extension-underline'
+import type { ReplyInfo } from './MessageItem.vue'
 
 const props = defineProps<{
   channelName: string
+  replyTo?: ReplyInfo | null
 }>()
 
 const emit = defineEmits<{
   send: [text: string]
+  'cancel-reply': []
 }>()
+
+const replyPreviewText = computed(() => {
+  if (!props.replyTo) return ''
+  const div = document.createElement('div')
+  div.innerHTML = props.replyTo.text
+  const plain = div.textContent || ''
+  return plain.length > 120 ? plain.slice(0, 120) + '…' : plain
+})
 
 const showEmojiPicker = ref(false)
 
@@ -109,6 +120,26 @@ onBeforeUnmount(() => {
       class="editor-card"
       color="outline-variant"
     >
+      <!-- Reply Preview -->
+      <v-slide-y-transition>
+        <div v-if="replyTo" class="reply-preview d-flex align-center px-3 pt-2 pb-1">
+          <div class="reply-preview-bar flex-grow-1 d-flex align-center gap-2 pa-2 rounded-lg">
+            <v-icon icon="mdi-reply" size="16" color="primary" class="reply-icon" />
+            <div class="flex-grow-1 min-width-0">
+              <div class="text-caption font-weight-bold text-primary">{{ replyTo.sender }}</div>
+              <div class="text-caption text-on-surface-variant text-truncate">{{ replyPreviewText }}</div>
+            </div>
+            <v-btn
+              icon="mdi-close"
+              variant="text"
+              size="x-small"
+              color="on-surface-variant"
+              @click="emit('cancel-reply')"
+            />
+          </div>
+        </div>
+      </v-slide-y-transition>
+
       <!-- Formatting Toolbar -->
       <div class="d-flex align-center px-2 pt-2 toolbar-row">
         <v-btn-group variant="text" density="compact" divided>
@@ -286,5 +317,18 @@ onBeforeUnmount(() => {
   height: 36px;
   font-size: 1.25rem;
   padding: 0 !important;
+}
+
+.reply-preview-bar {
+  background-color: rgba(var(--v-theme-primary), 0.08);
+  border-left: 2px solid rgb(var(--v-theme-primary));
+}
+
+.reply-icon {
+  transform: scaleX(-1);
+}
+
+.min-width-0 {
+  min-width: 0;
 }
 </style>
