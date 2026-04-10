@@ -120,7 +120,6 @@ onBeforeUnmount(() => {
       class="editor-card"
       color="outline-variant"
     >
-      <!-- Reply Preview -->
       <v-slide-y-transition>
         <div v-if="replyTo" class="reply-preview d-flex align-center px-3 pt-2 pb-1">
           <div class="reply-preview-bar flex-grow-1 d-flex align-center gap-2 pa-2 rounded-lg">
@@ -140,8 +139,7 @@ onBeforeUnmount(() => {
         </div>
       </v-slide-y-transition>
 
-      <!-- Formatting Toolbar -->
-      <div class="d-flex align-center px-2 pt-2 toolbar-row">
+      <!-- <div class="d-flex align-center px-2 pt-2 toolbar-row">
         <v-btn-group variant="text" density="compact" divided>
           <v-btn
             size="x-small"
@@ -191,14 +189,12 @@ onBeforeUnmount(() => {
           color="on-surface-variant"
           @click="editor?.chain().focus().toggleOrderedList().run()"
         />
-      </div>
+      </div> -->
 
-      <!-- Editor Area -->
-      <div class="px-3 py-1">
+      <div class="px-3 py-2">
         <EditorContent :editor="editor" />
       </div>
 
-      <!-- Bottom Actions -->
       <div class="d-flex align-center justify-space-between px-2 pb-2">
         <div class="d-flex align-center">
           <v-btn
