@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 
-defineProps<{
-  selected: string
+const props = defineProps<{
+  chatId?: string
+  workspaceId?: string
 }>()
 
 const emit = defineEmits<{
@@ -28,7 +29,7 @@ const directMessages = ref([
   { id: 'dm-4', name: 'Елена Смирнова', avatar: 'Е', online: false, unread: 5 },
 ])
 
-const filteredChannels = computed(() => {
+const filteredChats = computed(() => {
   if (!search.value) return channels.value
   const q = search.value.toLowerCase()
   return channels.value.filter(c => c.name.toLowerCase().includes(q))
@@ -121,20 +122,20 @@ const filteredDms = computed(() => {
       <v-expand-transition>
         <div v-show="channelsExpanded">
           <v-list-item
-            v-for="channel in filteredChannels"
-            :key="channel.id"
-            :active="selected === channel.id"
+            v-for="chat in filteredChats"
+            :key="chat.id"
+            :active="props.chatId === chat.id"
             rounded="lg"
-            @click="emit('select', channel.id)"
+            @click="emit('select', chat.id)"
           >
             <template #prepend>
               <v-icon icon="mdi-pound" size="18" class="mr-n1" />
             </template>
-            <v-list-item-title :class="{ 'font-weight-bold': channel.unread > 0 }">
-              {{ channel.name }}
+            <v-list-item-title :class="{ 'font-weight-bold': chat.unread > 0 }">
+              {{ chat.name }}
             </v-list-item-title>
-            <template v-if="channel.unread > 0" #append>
-              <v-badge color="primary" :content="channel.unread" inline />
+            <template v-if="chat.unread > 0" #append>
+              <v-badge color="primary" :content="chat.unread" inline />
             </template>
           </v-list-item>
         </div>
@@ -169,7 +170,7 @@ const filteredDms = computed(() => {
           <v-list-item
             v-for="dm in filteredDms"
             :key="dm.id"
-            :active="selected === dm.id"
+            :active="props.chatId === dm.id"
             rounded="lg"
             @click="emit('select', dm.id)"
           >
