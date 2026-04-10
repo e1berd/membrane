@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, nextTick, onMounted, watch } from 'vue'
+import { ref, computed, nextTick, onMounted, watch, useTemplateRef } from 'vue'
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
+import type { OverlayScrollbarsComponentRef } from 'overlayscrollbars-vue'
+import 'overlayscrollbars/overlayscrollbars.css'
 import MessageItem from '@/components/MessageItem.vue'
 import type { ReplyInfo } from '@/components/MessageItem.vue'
 import MessageEditor from '@/components/MessageEditor.vue'
@@ -188,13 +191,25 @@ const messages = ref<ChatMessage[]>([
   },
 ])
 
-const messagesContainer = ref<HTMLElement>()
+const osRef = useTemplateRef<OverlayScrollbarsComponentRef>('osRef')
+
+function getViewport(): HTMLElement | undefined {
+  return osRef.value?.osInstance()?.elements().viewport
+}
 
 function scrollToBottom() {
   nextTick(() => {
-    if (messagesContainer.value) {
-      messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
+    const viewport = getViewport()
+    if (viewport) {
+      viewport.scrollTop = viewport.scrollHeight
     }
+  })
+}
+
+function scrollToMessage(id: string) {
+  nextTick(() => {
+    const el = document.getElementById(`msg-${id}`)
+    el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   })
 }
 
@@ -266,8 +281,12 @@ watch(() => props.channel, () => {
 
       <v-divider />
 
-      <!-- Messages Area -->
-      <div ref="messagesContainer" class="messages-area flex-grow-1 overflow-y-auto py-2">
+      <OverlayScrollbarsComponent
+        ref="osRef"
+        class="messages-area flex-grow-1 py-2"
+        :options="{ scrollbars: { autoHide: 'scroll', theme: 'os-theme-membrane' } }"
+        defer
+      >
         <!-- Date Divider -->
         <div class="d-flex align-center px-4 my-3">
           <v-divider />
@@ -279,6 +298,7 @@ watch(() => props.channel, () => {
 
         <MessageItem
           v-for="(msg, index) in messages"
+          :id="`msg-${msg.id}`"
           :key="msg.id"
           :sender="msg.sender"
           :avatar="msg.avatar"
@@ -288,8 +308,9 @@ watch(() => props.channel, () => {
           :show-header="shouldShowHeader(index)"
           :reply-to="msg.replyTo"
           @reply="onReply(msg)"
+          @scroll-to="scrollToMessage"
         />
-      </div>
+      </OverlayScrollbarsComponent>
 
       <!-- Message Editor -->
       <MessageEditor
@@ -316,21 +337,7 @@ watch(() => props.channel, () => {
 }
 
 .messages-area {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(var(--v-theme-on-surface), 0.2) transparent;
-}
-
-.messages-area::-webkit-scrollbar {
-  width: 6px;
-}
-
-.messages-area::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.messages-area::-webkit-scrollbar-thumb {
-  background-color: rgba(var(--v-theme-on-surface), 0.2);
-  border-radius: 3px;
+  overflow: hidden;
 }
 
 .members-panel {

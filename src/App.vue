@@ -34,4 +34,19 @@ html, body {
 .main-content {
   height: 100dvh;
 }
+
+.os-theme-membrane.os-scrollbar {
+  --os-size: 6px;
+  --os-padding-perpendicular: 0px;
+  --os-padding-axis: 0px;
+  --os-track-border-radius: 0;
+  --os-track-bg: transparent;
+  --os-track-bg-hover: transparent;
+  --os-track-bg-active: transparent;
+  --os-handle-border-radius: 3px;
+  --os-handle-bg: rgba(var(--v-theme-on-surface), 0.2);
+  --os-handle-bg-hover: rgba(var(--v-theme-on-surface), 0.35);
+  --os-handle-bg-active: rgba(var(--v-theme-on-surface), 0.5);
+  --os-handle-min-size: 40px;
+}
 </style>
