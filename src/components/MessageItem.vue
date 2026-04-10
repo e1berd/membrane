@@ -34,7 +34,7 @@ const formattedTime = computed(() => {
           <span class="text-body-2 font-weight-bold">{{ sender }}</span>
           <span class="text-caption text-on-surface-variant">{{ formattedTime }}</span>
         </div>
-        <div class="text-body-2 message-text">{{ text }}</div>
+        <div class="text-body-2 message-text" v-html="text" />
       </div>
     </div>
   </div>
