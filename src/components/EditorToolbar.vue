@@ -80,5 +80,9 @@ function toggleFormat(format: 'bold' | 'italic' | 'underline' | 'strike' | 'code
   gap: 2px;
   width: 100%;
   overflow: hidden;
+
+  :where(.v-btn) {
+    flex-shrink: 0;
+  }
 }
 </style>

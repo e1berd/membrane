@@ -200,15 +200,27 @@ const filteredDms = computed(() => {
 
 <style scoped>
 .channel-drawer {
-  border-right: 1px solid rgba(var(--v-theme-outline-variant), 0.3) !important;
+  border-right: 1px solid color-mix(in srgb, rgb(var(--v-theme-outline-variant)) 30%, transparent) !important;
   z-index: 1000;
 }
 
-.search-field :deep(.v-field) {
-  font-size: 0.875rem;
+.search-field {
+  :deep(.v-field) {
+    font-size: 0.875rem;
+  }
+
+  :deep(.v-field__input) {
+    text-wrap: pretty;
+  }
 }
 
 .section-header {
   min-height: 32px;
+}
+
+@supports not (color: color-mix(in srgb, black 50%, transparent)) {
+  .channel-drawer {
+    border-right: 1px solid rgba(var(--v-theme-outline-variant), 0.3) !important;
+  }
 }
 </style>

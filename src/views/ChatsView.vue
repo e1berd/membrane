@@ -332,21 +332,31 @@ watch(() => props.channel, () => {
 </template>
 
 <style scoped>
-.chat-header {
-  border-bottom: none;
+.chat-view {
+  .chat-header {
+    border-bottom: none;
+  }
+
+  .messages-area {
+    overflow: hidden;
+  }
+
+  .members-panel {
+    inline-size: 240px;
+    display: flex;
+    background-color: rgb(var(--v-theme-surface));
+  }
+
+  .min-width-0 {
+    min-inline-size: 0;
+  }
 }
 
-.messages-area {
-  overflow: hidden;
-}
-
-.members-panel {
-  width: 240px;
-  display: flex;
-  background-color: rgb(var(--v-theme-surface));
-}
-
-.min-width-0 {
-  min-width: 0;
+@media (width <= 980px) {
+  .chat-view {
+    .members-panel {
+      inline-size: 220px;
+    }
+  }
 }
 </style>

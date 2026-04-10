@@ -139,19 +139,28 @@ const offlineMembers = computed(() =>
   height: 100%;
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: rgba(var(--v-theme-on-surface), 0.15) transparent;
+  scrollbar-color: color-mix(in srgb, rgb(var(--v-theme-on-surface)) 15%, transparent) transparent;
+
+  .member-item {
+    min-height: 42px;
+    transition: background-color 0.15s ease;
+
+    &.offline {
+      :deep(.v-list-item-title) {
+        opacity: 0.6;
+      }
+    }
+  }
+
+  .offline-avatar {
+    opacity: 0.5;
+    filter: saturate(0.7);
+  }
 }
 
-.member-item {
-  min-height: 42px;
-  transition: background-color 0.15s;
-}
-
-.offline-avatar {
-  opacity: 0.5;
-}
-
-.member-item.offline :deep(.v-list-item-title) {
-  opacity: 0.6;
+@supports not (color: color-mix(in srgb, black 50%, transparent)) {
+  .member-list {
+    scrollbar-color: rgba(var(--v-theme-on-surface), 0.15) transparent;
+  }
 }
 </style>

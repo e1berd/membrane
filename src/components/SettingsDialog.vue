@@ -99,8 +99,6 @@ function selectCategory(index: number) {
                           color="primary"
                           density="comfortable"
                           mandatory
-                          rounded="xl"
-                          divided
                           @update:model-value="updateThemePreference"
                         >
                           <v-btn value="system">Системная</v-btn>
@@ -123,40 +121,53 @@ function selectCategory(index: number) {
 <style scoped>
 .settings-card {
   overflow: hidden;
-}
 
-.settings-layout {
-  display: flex;
-  height: 100%;
-}
+  .settings-layout {
+    display: flex;
+    block-size: 100%;
+  }
 
-.settings-sidebar {
-  width: 180px;
-  flex-shrink: 0;
-  background: rgba(var(--v-theme-surface-variant), 0.2);
-}
+  .settings-sidebar {
+    inline-size: 180px;
+    flex-shrink: 0;
+    background: color-mix(in srgb, rgb(var(--v-theme-surface-variant)) 20%, transparent);
+  }
 
-.settings-sidebar-header {
-  opacity: 0.6;
-}
+  .settings-sidebar-header {
+    opacity: 0.6;
+  }
 
-.settings-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
+  .settings-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+  }
 
-.settings-content-body {
-  flex: 1;
-  overflow: hidden;
-  position: relative;
-}
+  .settings-content-body {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
 
-.settings-content-body > div {
-  position: absolute;
-  inset: 0;
-  overflow-y: auto;
+    > div {
+      position: absolute;
+      inset: 0;
+      overflow-y: auto;
+      text-wrap: pretty;
+    }
+  }
+
+  :deep(.v-list-item) {
+    --v-list-prepend-gap: 8px;
+  }
+
+  :deep(.v-btn-group) {
+    inline-size: 100%;
+
+    .v-btn {
+      flex: 1;
+    }
+  }
 }
 
 .slide-up-enter-active,
@@ -170,6 +181,7 @@ function selectCategory(index: number) {
   opacity: 0;
   transform: translateY(12px);
 }
+
 .slide-up-leave-to {
   opacity: 0;
   transform: translateY(-12px);
@@ -179,20 +191,26 @@ function selectCategory(index: number) {
   opacity: 0;
   transform: translateY(-12px);
 }
+
 .slide-down-leave-to {
   opacity: 0;
   transform: translateY(12px);
 }
 
-:deep(.v-list-item) {
-  --v-list-prepend-gap: 8px;
+@supports not (color: color-mix(in srgb, black 50%, transparent)) {
+  .settings-card {
+    .settings-sidebar {
+      background: rgba(var(--v-theme-surface-variant), 0.2);
+    }
+  }
 }
 
-:deep(.v-btn-group) {
-  width: 100%;
-}
-
-:deep(.v-btn-group .v-btn) {
-  flex: 1;
+@media (prefers-reduced-motion: reduce) {
+  .slide-up-enter-active,
+  .slide-up-leave-active,
+  .slide-down-enter-active,
+  .slide-down-leave-active {
+    transition-duration: 0.01ms;
+  }
 }
 </style>

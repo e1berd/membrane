@@ -5,6 +5,11 @@ import { createVuetify } from 'vuetify'
 export const vuetify = createVuetify({
   theme: {
     defaultTheme: 'dark',
+    variations: {
+      colors: ['primary', 'secondary', 'tertiary'],
+      lighten: 2,
+      darken: 2,
+    },
     themes: {
       light: {
         colors: {
@@ -60,6 +65,10 @@ export const vuetify = createVuetify({
     VBtn: {
       rounded: 'xl',
     },
+    VBtnToggle: {
+      rounded: 'xl',
+      divided: true,
+    },
     VTextField: {
       variant: 'outlined',
     },
@@ -68,6 +77,12 @@ export const vuetify = createVuetify({
     },
     VList: {
       bgColor: 'transparent',
+    },
+    VListItem: {
+      rounded: 'lg',
+    },
+    VToolbar: {
+      density: 'comfortable',
     },
     VNavigationDrawer: {
       color: 'surface-container',

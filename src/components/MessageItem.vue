@@ -119,67 +119,99 @@ function onReply() {
 
 <style scoped>
 .message-item {
-  transition: background-color 0.15s;
+  transition: background-color 0.15s ease;
+
+  .avatar-slot {
+    inline-size: 36px;
+    min-inline-size: 36px;
+  }
+
+  .hover-time {
+    opacity: 0;
+    font-size: 10px;
+    line-height: 1;
+    white-space: nowrap;
+    transition: opacity 0.15s ease;
+  }
+
+  .message-text {
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+    text-wrap: pretty;
+  }
+
+  .reply-reference {
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 4px;
+    border-left: 2px solid color-mix(in srgb, rgb(var(--v-theme-primary)) 60%, transparent);
+  }
+
+  .reply-text-preview {
+    max-inline-size: 400px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .reply-icon {
+    transform: scaleX(-1);
+  }
+
+  .gap-2 {
+    gap: 8px;
+  }
+
+  .gap-3 {
+    gap: 12px;
+  }
+
+  .min-width-0 {
+    min-inline-size: 0;
+  }
 }
 
-.message-item:hover {
-  background-color: rgba(var(--v-theme-on-surface), 0.04);
+@media (hover: hover) {
+  .message-item {
+    &:hover {
+      background-color: color-mix(in srgb, rgb(var(--v-theme-on-surface)) 4%, transparent);
+
+      .hover-time {
+        opacity: 1;
+      }
+    }
+
+    .reply-reference:hover {
+      background-color: color-mix(in srgb, rgb(var(--v-theme-on-surface)) 4%, transparent);
+    }
+  }
 }
 
-.avatar-slot {
-  width: 36px;
-  min-width: 36px;
+@supports not (color: color-mix(in srgb, black 50%, transparent)) {
+  .message-item {
+    .reply-reference {
+      border-left-color: rgba(var(--v-theme-primary), 0.6);
+    }
+  }
+
+  @media (hover: hover) {
+    .message-item {
+      &:hover {
+        background-color: rgba(var(--v-theme-on-surface), 0.04);
+      }
+
+      .reply-reference:hover {
+        background-color: rgba(var(--v-theme-on-surface), 0.04);
+      }
+    }
+  }
 }
 
-.hover-time {
-  opacity: 0;
-  font-size: 10px;
-  line-height: 1;
-  white-space: nowrap;
-  transition: opacity 0.15s;
-}
-
-.message-item:hover .hover-time {
-  opacity: 1;
-}
-
-.message-text {
-  white-space: pre-wrap;
-  word-break: break-word;
-  line-height: 1.5;
-}
-
-.reply-reference {
-  cursor: pointer;
-  padding: 2px 8px;
-  border-radius: 4px;
-  border-left: 2px solid rgba(var(--v-theme-primary), 0.6);
-}
-
-.reply-reference:hover {
-  background-color: rgba(var(--v-theme-on-surface), 0.04);
-}
-
-.reply-text-preview {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 400px;
-}
-
-.reply-icon {
-  transform: scaleX(-1);
-}
-
-.gap-2 {
-  gap: 8px;
-}
-
-.gap-3 {
-  gap: 12px;
-}
-
-.min-width-0 {
-  min-width: 0;
+@media (prefers-reduced-motion: reduce) {
+  .message-item,
+  .message-item .hover-time {
+    transition-duration: 0.01ms;
+  }
 }
 </style>

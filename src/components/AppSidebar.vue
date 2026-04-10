@@ -20,7 +20,7 @@ const workspaces = [
   >
     <div class="rail-content">
       <div class="rail-group">
-        <v-tooltip text="Home" location="end">
+        <v-tooltip text="Главная" location="end">
           <template #activator="{ props }">
             <v-btn
               v-bind="props"
@@ -90,40 +90,40 @@ const workspaces = [
 
 <style scoped>
 .workspace-rail {
-  border-right: 1px solid rgba(var(--v-theme-outline-variant), 0.3) !important;
+  border-right: 1px solid color-mix(in srgb, rgb(var(--v-theme-outline-variant)) 30%, transparent) !important;
   z-index: 1001;
+
+  .rail-content,
+  .rail-group,
+  .rail-append {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .rail-content {
+    padding: 12px 0;
+  }
+
+  .rail-divider {
+    inline-size: 40px;
+  }
+
+  .rail-btn {
+    inline-size: 44px;
+    block-size: 44px;
+    min-inline-size: 44px;
+  }
+
+  .rail-append {
+    padding-bottom: 12px;
+  }
 }
 
-.rail-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 12px 0;
-  gap: 8px;
-}
-
-.rail-group {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.rail-divider {
-  width: 40px;
-}
-
-.rail-btn {
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-}
-
-.rail-append {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding-bottom: 12px;
+@supports not (color: color-mix(in srgb, black 50%, transparent)) {
+  .workspace-rail {
+    border-right: 1px solid rgba(var(--v-theme-outline-variant), 0.3) !important;
+  }
 }
 </style>
