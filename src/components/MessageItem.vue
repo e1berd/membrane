@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { defineAsyncComponent, ref, computed } from 'vue'
 import { format } from 'date-fns'
+
+const UserProfileDialog = defineAsyncComponent(() => import('@/components/UserProfileDialog.vue'))
 
 export interface ReplyInfo {
   id: string
@@ -68,14 +70,21 @@ function copyMessageContent() {
     </div>
 
     <div class="d-flex gap-3">
-      <v-avatar
+      <UserProfileDialog
         v-if="showHeader"
-        size="36"
-        :color="color || 'primary'"
-        class="mt-1 avatar-slot"
+        :user="{ name: sender, avatar, color: color || 'primary' }"
       >
-        <span class="text-body-2 font-weight-medium">{{ avatar }}</span>
-      </v-avatar>
+        <template #activator="{ props: profileProps }">
+          <v-avatar
+            v-bind="profileProps"
+            size="36"
+            :color="color || 'primary'"
+            class="mt-1 avatar-slot clickable-avatar"
+          >
+            <span class="text-body-2 font-weight-medium">{{ avatar }}</span>
+          </v-avatar>
+        </template>
+      </UserProfileDialog>
       <div v-else class="avatar-slot d-flex align-center justify-center">
         <span class="hover-time text-caption text-on-surface-variant">{{ formattedTime }}</span>
       </div>
@@ -127,6 +136,10 @@ function copyMessageContent() {
   .avatar-slot {
     inline-size: 36px;
     min-inline-size: 36px;
+  }
+
+  .clickable-avatar {
+    cursor: pointer;
   }
 
   .hover-time {

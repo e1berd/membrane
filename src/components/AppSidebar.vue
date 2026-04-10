@@ -2,8 +2,17 @@
 import { defineAsyncComponent, ref } from 'vue'
 
 const SettingsDialog = defineAsyncComponent(() => import('@/components/SettingsDialog.vue'))
+const UserProfileDialog = defineAsyncComponent(() => import('@/components/UserProfileDialog.vue'))
 
 const activeDestination = ref('home')
+
+const currentUser = {
+  name: 'User',
+  avatar: 'U',
+  color: 'primary',
+  status: 'online' as const,
+  email: 'user@example.com',
+}
 
 const workspaces = [
   { name: 'Membrane', icon: 'mdi-alpha-m-box' },
@@ -80,9 +89,18 @@ const workspaces = [
       <div class="rail-append">
         <SettingsDialog />
 
-        <v-avatar size="36" color="primary">
-          <span class="text-body-2 font-weight-medium">U</span>
-        </v-avatar>
+        <UserProfileDialog :user="currentUser" is-current-user>
+          <template #activator="{ props: profileProps }">
+            <v-avatar
+              v-bind="profileProps"
+              size="36"
+              color="primary"
+              class="cursor-pointer"
+            >
+              <span class="text-body-2 font-weight-medium">U</span>
+            </v-avatar>
+          </template>
+        </UserProfileDialog>
       </div>
     </template>
   </v-navigation-drawer>
@@ -118,6 +136,10 @@ const workspaces = [
 
   .rail-append {
     padding-bottom: 12px;
+  }
+
+  .cursor-pointer {
+    cursor: pointer;
   }
 }
 

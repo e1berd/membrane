@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, defineAsyncComponent } from 'vue'
+
+const UserProfileDialog = defineAsyncComponent(() => import('@/components/UserProfileDialog.vue'))
 
 interface Member {
   id: string
@@ -58,40 +60,47 @@ const offlineMembers = computed(() =>
     </div>
 
     <v-list density="compact" class="pa-0 px-2" bg-color="transparent">
-      <v-list-item
+      <UserProfileDialog
         v-for="member in onlineMembers"
         :key="member.id"
-        rounded="lg"
-        class="member-item"
+        :user="{ name: member.name, avatar: member.avatar, color: member.color, status: member.status, customStatus: member.customStatus, role: member.role }"
       >
-        <template #prepend>
-          <v-badge
-            :color="statusColor[member.status]"
-            dot
-            location="bottom end"
-            bordered
-            offset-x="2"
-            offset-y="2"
+        <template #activator="{ props: profileProps }">
+          <v-list-item
+            v-bind="profileProps"
+            rounded="lg"
+            class="member-item"
           >
-            <v-avatar size="32" :color="member.color">
-              <span class="text-caption font-weight-medium">{{ member.avatar }}</span>
-            </v-avatar>
-          </v-badge>
-        </template>
+            <template #prepend>
+              <v-badge
+                :color="statusColor[member.status]"
+                dot
+                location="bottom end"
+                bordered
+                offset-x="2"
+                offset-y="2"
+              >
+                <v-avatar size="32" :color="member.color">
+                  <span class="text-caption font-weight-medium">{{ member.avatar }}</span>
+                </v-avatar>
+              </v-badge>
+            </template>
 
-        <v-list-item-title class="text-body-2 text-truncate">
-          {{ member.name }}
-        </v-list-item-title>
-        <v-list-item-subtitle v-if="member.customStatus" class="text-caption text-truncate">
-          {{ member.customStatus }}
-        </v-list-item-subtitle>
+            <v-list-item-title class="text-body-2 text-truncate">
+              {{ member.name }}
+            </v-list-item-title>
+            <v-list-item-subtitle v-if="member.customStatus" class="text-caption text-truncate">
+              {{ member.customStatus }}
+            </v-list-item-subtitle>
 
-        <template v-if="member.role" #append>
-          <v-chip size="x-small" variant="tonal" color="primary" class="ml-2 text-truncate">
-            {{ member.role }}
-          </v-chip>
+            <template v-if="member.role" #append>
+              <v-chip size="x-small" variant="tonal" color="primary" class="ml-2 text-truncate">
+                {{ member.role }}
+              </v-chip>
+            </template>
+          </v-list-item>
         </template>
-      </v-list-item>
+      </UserProfileDialog>
     </v-list>
 
     <!-- Offline -->
@@ -102,34 +111,41 @@ const offlineMembers = computed(() =>
     </div>
 
     <v-list density="compact" class="pa-0 px-2" bg-color="transparent">
-      <v-list-item
+      <UserProfileDialog
         v-for="member in offlineMembers"
         :key="member.id"
-        rounded="lg"
-        class="member-item offline"
+        :user="{ name: member.name, avatar: member.avatar, color: member.color, status: member.status }"
       >
-        <template #prepend>
-          <v-badge
-            :color="statusColor[member.status]"
-            dot
-            location="bottom end"
-            bordered
-            offset-x="2"
-            offset-y="2"
+        <template #activator="{ props: profileProps }">
+          <v-list-item
+            v-bind="profileProps"
+            rounded="lg"
+            class="member-item offline"
           >
-            <v-avatar size="32" :color="member.color" class="offline-avatar">
-              <span class="text-caption font-weight-medium">{{ member.avatar }}</span>
-            </v-avatar>
-          </v-badge>
-        </template>
+            <template #prepend>
+              <v-badge
+                :color="statusColor[member.status]"
+                dot
+                location="bottom end"
+                bordered
+                offset-x="2"
+                offset-y="2"
+              >
+                <v-avatar size="32" :color="member.color" class="offline-avatar">
+                  <span class="text-caption font-weight-medium">{{ member.avatar }}</span>
+                </v-avatar>
+              </v-badge>
+            </template>
 
-        <v-list-item-title class="text-body-2 text-on-surface-variant text-truncate">
-          {{ member.name }}
-        </v-list-item-title>
-        <v-list-item-subtitle v-if="member.lastSeen" class="text-caption text-truncate">
-          {{ member.lastSeen }}
-        </v-list-item-subtitle>
-      </v-list-item>
+            <v-list-item-title class="text-body-2 text-on-surface-variant text-truncate">
+              {{ member.name }}
+            </v-list-item-title>
+            <v-list-item-subtitle v-if="member.lastSeen" class="text-caption text-truncate">
+              {{ member.lastSeen }}
+            </v-list-item-subtitle>
+          </v-list-item>
+        </template>
+      </UserProfileDialog>
     </v-list>
   </div>
 </template>
