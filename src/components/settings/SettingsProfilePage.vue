@@ -310,6 +310,9 @@ loadProfile()
   .preview-avatar {
     border: 3px solid rgb(var(--v-theme-surface));
     display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .avatar-initial {
