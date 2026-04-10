@@ -19,9 +19,12 @@ const avatarInitial = computed(() =>
 )
 
 const userForDialog = computed(() => ({
+  userId: profile.value?.id,
   name: profile.value?.username ?? '',
   avatar: avatarInitial.value,
   color: profile.value?.profile_color ?? 'primary',
+  avatar_url: profile.value?.avatar_url ?? null,
+  overlay_url: profile.value?.overlay_url ?? null,
   email: '',
 }))
 </script>
@@ -110,7 +113,7 @@ const userForDialog = computed(() => ({
           </template>
         </SettingsDialog>
 
-        <UserProfileDialog :user="userForDialog" is-current-user>
+        <UserProfileDialog :user="userForDialog">
           <template #activator="{ props: profileProps }">
             <v-avatar
               v-bind="profileProps"

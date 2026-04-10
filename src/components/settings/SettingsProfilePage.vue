@@ -86,11 +86,16 @@ async function uploadMedia(file: File, slot: 'avatar' | 'overlay'): Promise<stri
   return `${publicUrl}?t=${Date.now()}`
 }
 
-async function persistField(field: 'avatar_url' | 'overlay_url', value: string) {
+async function persistField(field: 'avatar_url' | 'overlay_url', value: string | null) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
   await supabase.from('profiles').update({ [field]: value, updated_at: new Date().toISOString() }).eq('id', user.id)
   patch({ [field]: value })
+}
+
+async function clearMedia(field: 'avatar_url' | 'overlay_url') {
+  profile.value[field] = ''
+  await persistField(field, null)
 }
 
 async function onAvatarChange(e: Event) {
@@ -221,6 +226,31 @@ loadProfile()
         </div>
       </div>
 
+      <div v-if="profile.avatar_url || profile.overlay_url" class="d-flex gap-2 px-4 mb-3">
+        <v-chip
+          v-if="profile.avatar_url"
+          size="small"
+          variant="tonal"
+          color="error"
+          prepend-icon="mdi-account-remove-outline"
+          class="cursor-pointer"
+          @click="clearMedia('avatar_url')"
+        >
+          Удалить аватар
+        </v-chip>
+        <v-chip
+          v-if="profile.overlay_url"
+          size="small"
+          variant="tonal"
+          color="error"
+          prepend-icon="mdi-image-remove-outline"
+          class="cursor-pointer"
+          @click="clearMedia('overlay_url')"
+        >
+          Удалить фон
+        </v-chip>
+      </div>
+
       <div class="px-4">
         <v-alert
           v-if="uploadError"
@@ -291,6 +321,14 @@ loadProfile()
 <style scoped>
 .page-root {
   display: contents;
+}
+
+.gap-2 {
+  gap: 8px;
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }
 
 .profile-preview {

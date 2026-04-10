@@ -1,14 +1,19 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, defineAsyncComponent } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { openIamWindow } from '@/lib/windows'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { useCurrentProfile } from '@/composables/useCurrentProfile'
 
+const SettingsDialog = defineAsyncComponent(() => import('@/components/SettingsDialog.vue'))
+
 export interface UserProfileInfo {
+  userId?: string
   name: string
   avatar: string
   color: string
+  avatar_url?: string | null
+  overlay_url?: string | null
   status?: 'online' | 'idle' | 'dnd' | 'offline'
   customStatus?: string
   role?: string
@@ -17,8 +22,12 @@ export interface UserProfileInfo {
 
 const props = defineProps<{
   user: UserProfileInfo
-  isCurrentUser?: boolean
 }>()
+
+const { profile: currentProfile } = useCurrentProfile()
+const isCurrentUser = computed(() =>
+  !!props.user.userId && props.user.userId === currentProfile.value?.id
+)
 
 const dialog = ref(false)
 const loggingOut = ref(false)
@@ -60,11 +69,17 @@ const statusColor: Record<string, string> = {
     </template>
 
     <v-card rounded="xl" class="profile-card">
-      <div class="profile-banner" />
+      <div
+        class="profile-banner"
+        :style="props.user.overlay_url
+          ? { backgroundImage: `url(${props.user.overlay_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+          : undefined"
+      />
 
       <div class="profile-avatar-wrapper">
         <v-avatar size="72" :color="props.user.color">
-          <span class="text-h5 font-weight-medium">{{ props.user.avatar }}</span>
+          <v-img v-if="props.user.avatar_url" :src="props.user.avatar_url" />
+          <span v-else class="text-h5 font-weight-medium">{{ props.user.avatar }}</span>
         </v-avatar>
       </div>
 
@@ -101,11 +116,24 @@ const statusColor: Record<string, string> = {
 
       <v-divider />
 
-      <v-card-actions class="pa-3">
+      <v-card-actions class="pa-3 d-flex flex-column gap-2">
         <template v-if="isCurrentUser">
+          <SettingsDialog default-tab="profile" class="w-100">
+            <template #activator="{ props: settingsProps }">
+              <v-btn
+                v-bind="settingsProps"
+                block
+                variant="tonal"
+                color="primary"
+                prepend-icon="mdi-account-edit-outline"
+              >
+                Настроить профиль
+              </v-btn>
+            </template>
+          </SettingsDialog>
           <v-btn
             block
-            variant="tonal"
+            variant="text"
             color="error"
             prepend-icon="mdi-logout"
             :loading="loggingOut"
@@ -154,6 +182,14 @@ const statusColor: Record<string, string> = {
 
   .gap-1 {
     gap: 4px;
+  }
+
+  .gap-2 {
+    gap: 8px;
+  }
+
+  .w-100 {
+    inline-size: 100%;
   }
 }
 

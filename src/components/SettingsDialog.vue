@@ -6,12 +6,18 @@ import 'overlayscrollbars/overlayscrollbars.css'
 const ProfilePage = defineAsyncComponent(() => import('@/components/settings/SettingsProfilePage.vue'))
 const AppearancePage = defineAsyncComponent(() => import('@/components/settings/SettingsAppearancePage.vue'))
 
+const props = defineProps<{
+  defaultTab?: string
+}>()
+
 const categories = [
   { id: 'appearance', label: 'Внешний вид', icon: 'mdi-palette-outline', component: AppearancePage },
   { id: 'profile', label: 'Профиль', icon: 'mdi-account-outline', component: ProfilePage },
 ]
 
-const activeIndex = ref(0)
+const activeIndex = ref(
+  props.defaultTab ? Math.max(0, categories.findIndex(c => c.id === props.defaultTab)) : 0
+)
 const prevIndex = ref(0)
 const activeId = computed(() => categories[activeIndex.value].id)
 const currentComponent = computed(() => categories[activeIndex.value].component)
