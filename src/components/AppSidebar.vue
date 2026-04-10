@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import SettingsDialog from '@/components/SettingsDialog.vue'
+import { defineAsyncComponent, ref } from 'vue'
+
+const SettingsDialog = defineAsyncComponent(() => import('@/components/SettingsDialog.vue'))
 
 const activeWorkspace = ref(0)
 
