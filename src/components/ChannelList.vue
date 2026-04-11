@@ -2,7 +2,8 @@
 import { useCurrentProfile } from '@/composables/useCurrentProfile'
 import { supabase } from '@/lib/supabase'
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
-import { computed, onUnmounted, ref } from 'vue'
+import type { RealtimeChannel } from '@supabase/supabase-js'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 const props = defineProps<{
   workspaceId?: string
@@ -34,28 +35,32 @@ const { data: chats, isLoading, error } = useQuery({
 
 const queryClient = useQueryClient()
 
-const channel = supabase
-  .channel('chats-inserts')
-  .on(
-    'postgres_changes',
-    { event: 'INSERT', schema: 'public', table: 'chats' },
-    async (payload) => {
-      const { data } = await supabase
-        .from('chat_members')
-        .select('user_id')
-        .eq('chat_id', payload.new.id)
-        .eq('user_id', profile.value?.id ?? '')
-        .maybeSingle()
+let channel: RealtimeChannel | null = null
 
-      if (data) {
-        queryClient.invalidateQueries({ queryKey: ['chats'] })
-      }
-    },
-  )
-  .subscribe()
+onMounted(() => {
+  channel = supabase
+    .channel('chats-inserts')
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'chats' },
+      async (payload) => {
+        const { data } = await supabase
+          .from('chat_members')
+          .select('user_id')
+          .eq('chat_id', payload.new.id)
+          .eq('user_id', profile.value?.id ?? '')
+          .maybeSingle()
+
+        if (data) {
+          queryClient.invalidateQueries({ queryKey: ['chats'] })
+        }
+      },
+    )
+    .subscribe()
+})
 
 onUnmounted(() => {
-  supabase.removeChannel(channel)
+  if (channel) supabase.removeChannel(channel)
 })
 
 </script>
