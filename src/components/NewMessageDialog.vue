@@ -24,7 +24,11 @@ watch(query, (val) => {
   searchTimeout = setTimeout(async () => {
     const { data } = await supabase
       .from('profiles')
-      .select('*')
+      .select(`
+        username,bio,avatar_url,
+        profile_color,updated_at,
+        created_at,overlay_url
+      `)
       .ilike('username', `%${val.trim()}%`)
       .limit(10)
     results.value = (data ?? []) as Profile[]
