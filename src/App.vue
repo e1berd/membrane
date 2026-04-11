@@ -56,6 +56,11 @@ onUnmounted(() => {
   }
 }
 
+/* Single GPU compositing layer for overlays — prevents WebKitGTK flicker on fast cursor movement */
+.v-overlay {
+  transform: translateZ(0);
+}
+
 html,
 body {
   block-size: 100%;
