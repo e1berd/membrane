@@ -40,7 +40,7 @@ function selectCategory(index: number) {
     </template>
 
     <template #default="{ isActive }">
-      <v-card class="settings-card" height="500">
+      <v-card class="settings-card" height="540">
         <div class="settings-layout">
           <div class="settings-sidebar">
             <div class="settings-sidebar-header px-4 pt-4 pb-3">
