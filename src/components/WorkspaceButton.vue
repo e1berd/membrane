@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute, useRouter } from '@kitbag/router'
+import { useLink } from '@kitbag/router'
 
 const props = defineProps<{
   workspaceId: string
@@ -8,10 +7,8 @@ const props = defineProps<{
   icon: string
 }>()
 
-const route = useRoute()
-const router = useRouter()
+const { href, isMatch, push } = useLink('workspace', { workspaceId: props.workspaceId })
 
-const isActive = computed(() => route.name === 'workspace' && route.params.workspaceId === props.workspaceId)
 </script>
 
 <template>
@@ -21,10 +18,11 @@ const isActive = computed(() => route.name === 'workspace' && route.params.works
         v-bind="tooltipProps"
         :icon="icon"
         class="rail-btn"
-        :color="isActive ? 'primary' : 'on-surface-variant'"
-        :variant="isActive ? 'tonal' : 'text'"
+        :color="isMatch ? 'primary' : 'on-surface-variant'"
+        :variant="isMatch ? 'tonal' : 'text'"
         rounded="lg"
-        @click="router.push(`/workspace/${workspaceId}`)"
+        :to="href"
+        @click.stop="push()"
       />
     </template>
   </v-tooltip>
