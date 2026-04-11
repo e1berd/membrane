@@ -1,43 +1,35 @@
-import { ref, readonly } from 'vue'
+import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import { supabase } from '@/lib/supabase'
-import type { Profile } from '@/rstore/collections'
-
-const profile = ref<Profile | null>(null)
-const loading = ref(false)
-let initialized = false
+import type { Tables } from '@/lib/database.types'
 
 export function useCurrentProfile() {
-  async function load() {
-    if (loading.value || initialized) return
-    loading.value = true
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-      const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
-      if (data) {
-        profile.value = data as Profile
-        initialized = true
-      }
-    } finally {
-      loading.value = false
-    }
-  }
+  const queryClient = useQueryClient()
 
-  function patch(updates: Partial<Profile>) {
-    if (profile.value) {
-      profile.value = { ...profile.value, ...updates }
-    }
+  const { data: profile, isLoading: loading } = useQuery({
+    queryKey: ['currentProfile'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return null
+      const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+      return data
+    },
+    staleTime: Infinity,
+  })
+
+  function patch(updates: Partial<Tables<'profiles'>>) {
+    queryClient.setQueryData(['currentProfile'], (old: Tables<'profiles'> | null) => {
+      if (!old) return old
+      return { ...old, ...updates }
+    })
   }
 
   function reset() {
-    profile.value = null
-    initialized = false
+    queryClient.setQueryData(['currentProfile'], null)
   }
 
   return {
-    profile: readonly(profile),
-    loading: readonly(loading),
-    load,
+    profile,
+    loading,
     patch,
     reset,
   }

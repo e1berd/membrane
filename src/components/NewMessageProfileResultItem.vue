@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { Profile } from '@/rstore/collections'
+import type { Tables } from '@/lib/database.types'
 import { useLink } from '@kitbag/router'
 
 const props = defineProps<{
-  profile: Profile
+  profile: Tables<'profiles'>
 }>()
 
 function getInitial(username: string) {

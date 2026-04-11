@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { supabase } from '@/lib/supabase'
-import type { Profile } from '@/rstore/collections'
+import type { Tables } from '@/lib/database.types'
 import { vAutoAnimate } from '@formkit/auto-animate/vue'
 import { defineAsyncComponent, ref, useTemplateRef, watch } from 'vue'
 
@@ -10,7 +10,7 @@ const NewMessageSearchEmptyState = defineAsyncComponent(() => import('@/componen
 const dialog = ref(false)
 const searchInput = useTemplateRef<{ focus: () => void }>('searchInput')
 const query = ref('')
-const results = ref<Profile[]>([])
+const results = ref<Tables<'profiles'>[]>([])
 const loading = ref(false)
 
 let searchTimeout: ReturnType<typeof setTimeout> | null = null
@@ -34,7 +34,7 @@ watch(query, (val) => {
       )
       .ilike('username', `%${val.trim()}%`)
       .limit(10)
-    results.value = (data ?? []) as Profile[]
+    results.value = data ?? []
     loading.value = false
   }, 300)
 })

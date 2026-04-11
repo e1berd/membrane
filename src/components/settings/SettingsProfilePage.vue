@@ -89,7 +89,7 @@ async function uploadMedia(file: File, slot: 'avatar' | 'overlay'): Promise<stri
 async function persistField(field: 'avatar_url' | 'overlay_url', value: string | null) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
-  await supabase.from('profiles').update({ [field]: value, updated_at: new Date().toISOString() }).eq('id', user.id)
+  await supabase.from('profiles').update({ [field]: value, updated_at: new Date().toISOString() } as any).eq('id', user.id)
   patch({ [field]: value })
 }
 

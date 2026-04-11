@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { useCurrentProfile } from '@/composables/useCurrentProfile'
 import { supabase } from '@/lib/supabase'
-import type { Chat } from '@/rstore/collections'
-import { PostgrestSingleResponse } from '@supabase/supabase-js'
-import { onUnmounted, ref, watch } from 'vue'
+import { useQuery, useQueryClient } from '@tanstack/vue-query'
+import { computed, onUnmounted, ref } from 'vue'
 
 const props = defineProps<{
   workspaceId?: string
@@ -14,20 +13,26 @@ const emit = defineEmits<{
 }>()
 
 const search = ref('')
-const isLoading = ref(true)
-const chats = ref<PostgrestSingleResponse<Chat[]>>()
-
 const { profile } = useCurrentProfile()
 
-let limit = 128
-function loadChats() {
-  return supabase
-    .from('chats')
-    .select('*, chat_members!inner(user_id)')
-    .eq('type', 'direct')
-    .eq('chat_members.user_id', profile.value?.id)
-    .limit(limit)
-}
+const profileId = computed(() => profile.value?.id)
+
+const { data: chats, isLoading, error } = useQuery({
+  queryKey: ['chats', profileId],
+  queryFn: async () => {
+    const { data, error } = await supabase
+      .from('chats')
+      .select('*, chat_members!inner(user_id)')
+      .eq('type', 'direct')
+      .eq('chat_members.user_id', profileId.value!)
+      .limit(128)
+    if (error) throw error
+    return data
+  },
+  enabled: () => !!profileId.value,
+})
+
+const queryClient = useQueryClient()
 
 const channel = supabase
   .channel('chats-inserts')
@@ -39,25 +44,15 @@ const channel = supabase
         .from('chat_members')
         .select('user_id')
         .eq('chat_id', payload.new.id)
-        .eq('user_id', profile.value?.id)
+        .eq('user_id', profile.value?.id ?? '')
         .maybeSingle()
 
       if (data) {
-        chats.value?.data?.push(payload.new as Chat)
+        queryClient.invalidateQueries({ queryKey: ['chats'] })
       }
     },
   )
   .subscribe()
-
-watch(
-  profile,
-  async (p) => {
-    if (!p) return
-    chats.value = await loadChats()
-    isLoading.value = false
-  },
-  { immediate: true },
-)
 
 onUnmounted(() => {
   supabase.removeChannel(channel)
@@ -108,14 +103,14 @@ onUnmounted(() => {
     </div>
 
     <v-alert
-      v-if="chats?.error"
+      v-if="error"
       type="error"
       variant="tonal"
       class="ma-2"
-    >{{ chats.error.message }}</v-alert>
+    >{{ (error as Error).message }}</v-alert>
 
     <div
-      v-if="!isLoading && !chats?.error && !chats?.data?.length"
+      v-if="!isLoading && !error && !chats?.length"
       class="d-flex align-center justify-center flex-grow-1"
       style="height: calc(100% - 124px)"
     >

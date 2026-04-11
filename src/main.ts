@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+import { VueQueryPlugin } from '@tanstack/vue-query'
 import App from './App.vue'
 import { supabase } from './lib/supabase'
 import { openIamWindow, openErrorWindow } from './lib/windows'
@@ -6,7 +7,6 @@ import { getCurrentWindow } from '@tauri-apps/api/window'
 import { listen } from '@tauri-apps/api/event'
 import { router } from './router'
 import { vuetify } from '@/plugins/vuetify'
-import { setupRstore } from '@/rstore'
 import { initializeTheme } from '@/lib/theme'
 
 let currentWindow: ReturnType<typeof getCurrentWindow>
@@ -24,8 +24,7 @@ async function initializeApp() {
   currentWindow = getCurrentWindow()
 
   const app = createApp(App)
-  app.use(router).use(vuetify)
-  await setupRstore(app)
+  app.use(router).use(vuetify).use(VueQueryPlugin)
   initializeTheme(vuetify.theme)
   app.mount('#app')
 

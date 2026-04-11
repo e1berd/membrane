@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineAsyncComponent, computed, onMounted } from 'vue'
+import { defineAsyncComponent, computed } from 'vue'
 import { useCurrentProfile } from '@/composables/useCurrentProfile'
 import { useRouter, useRoute } from '@kitbag/router'
 import WorkspaceButton from '@/components/WorkspaceButton.vue'
@@ -16,9 +16,7 @@ const workspaces = [
   { name: 'Membrane', icon: 'mdi-alpha-m-box', workspaceId: crypto.randomUUID() },
 ]
 
-const { profile, load } = useCurrentProfile()
-
-onMounted(() => load())
+const { profile } = useCurrentProfile()
 
 const avatarInitial = computed(() =>
   profile.value?.username ? profile.value.username.charAt(0).toUpperCase() : '?'

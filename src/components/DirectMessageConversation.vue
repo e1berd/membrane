@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, nextTick, onMounted, watch, useTemplateRef, defineAsyncComponent } from 'vue'
+import { ref, computed, nextTick, onMounted, watch, useTemplateRef, defineAsyncComponent, toRef } from 'vue'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
 import type { OverlayScrollbarsComponentRef } from 'overlayscrollbars-vue'
 import 'overlayscrollbars/overlayscrollbars.css'
 import type { ReplyInfo } from '@/components/MessageItem.vue'
 import { supabase } from '@/lib/supabase'
-import type { Profile } from '@/rstore/collections'
+import { useQuery } from '@tanstack/vue-query'
 
 const ChatMessagesList = defineAsyncComponent(() => import('@/components/ChatMessagesList.vue'))
 const MessageEditor = defineAsyncComponent(() => import('@/components/MessageEditor.vue'))
@@ -15,21 +15,20 @@ const props = defineProps<{
   chatId: string
 }>()
 
-const profile = ref<Profile | null>(null)
-const loadingProfile = ref(true)
+const profileIdRef = toRef(() => props.profileId)
 
-async function loadProfile() {
-  loadingProfile.value = true
-  const { data } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', props.profileId)
-    .single()
-  if (data) {
-    profile.value = data as Profile
-  }
-  loadingProfile.value = false
-}
+const { data: profile } = useQuery({
+  queryKey: ['profile', profileIdRef],
+  queryFn: async () => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', props.profileId)
+      .single()
+    if (error) throw error
+    return data
+  },
+})
 
 const isNewChat = computed(() => !props.chatId || props.chatId === 'new')
 
@@ -112,12 +111,10 @@ function onSend(html: string) {
 }
 
 onMounted(() => {
-  loadProfile()
   scrollToBottom()
 })
 
 watch(() => props.profileId, () => {
-  loadProfile()
   messages.value = []
 })
 </script>
