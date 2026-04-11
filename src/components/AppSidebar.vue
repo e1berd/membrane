@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import { defineAsyncComponent, ref, computed, onMounted } from 'vue'
+import { defineAsyncComponent, computed, onMounted } from 'vue'
 import { useCurrentProfile } from '@/composables/useCurrentProfile'
-import { useRouter } from '@kitbag/router'
+import { useRouter, useRoute } from '@kitbag/router'
+import WorkspaceButton from '@/components/WorkspaceButton.vue'
 
 const SettingsDialog = defineAsyncComponent(() => import('@/components/SettingsDialog.vue'))
 const UserProfileDialog = defineAsyncComponent(() => import('@/components/UserProfileDialog.vue'))
 
 const router = useRouter()
-const activeDestination = ref('home')
+const route = useRoute()
+
+const isHomeActive = computed(() => route.name === 'home')
+
 const workspaces = [
   { name: 'Membrane', icon: 'mdi-alpha-m-box', workspaceId: crypto.randomUUID() },
 ]
@@ -48,10 +52,10 @@ const userForDialog = computed(() => ({
               v-bind="props"
               icon="mdi-home"
               class="rail-btn"
-              :color="activeDestination === 'home' ? 'primary' : 'on-surface-variant'"
-              :variant="activeDestination === 'home' ? 'tonal' : 'text'"
+              :color="isHomeActive ? 'primary' : 'on-surface-variant'"
+              :variant="isHomeActive ? 'tonal' : 'text'"
               rounded="lg"
-              @click="activeDestination = 'home', router.push('/')"
+              @click="router.push('/')"
             />
           </template>
         </v-tooltip>
@@ -60,24 +64,13 @@ const userForDialog = computed(() => ({
       <v-divider class="rail-divider" />
 
       <div class="rail-group">
-        <v-tooltip
+        <WorkspaceButton
           v-for="(ws, i) in workspaces"
           :key="i"
-          :text="ws.name"
-          location="end"
-        >
-          <template #activator="{ props }">
-            <v-btn
-              v-bind="props"
-              :icon="ws.icon"
-              class="rail-btn"
-              :color="activeDestination === `ws-${i}` ? 'primary' : 'on-surface-variant'"
-              :variant="activeDestination === `ws-${i}` ? 'tonal' : 'text'"
-              rounded="lg"
-              @click="activeDestination = `ws-${i}`, router.push(`/workspace/${ws.workspaceId}`)"
-            />
-          </template>
-        </v-tooltip>
+          :workspace-id="ws.workspaceId"
+          :name="ws.name"
+          :icon="ws.icon"
+        />
       </div>
 
       <v-divider class="rail-divider" />

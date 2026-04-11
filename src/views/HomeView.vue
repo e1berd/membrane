@@ -3,89 +3,91 @@ import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
 import 'overlayscrollbars/overlayscrollbars.css'
 import NewMessageDialog from '@/components/NewMessageDialog.vue'
 import SettingsDialog from '@/components/SettingsDialog.vue'
+import ChannelList from '@/components/ChannelList.vue'
 
 </script>
 
 <template>
-  <div class="home-view">
-    <div class="home-content">
-      <div class="home-header">
-        <v-icon icon="mdi-alpha-m-box" size="48" color="primary" class="mb-2" />
-        <h1 class="text-h4 font-weight-bold">Membrane</h1>
-        <p class="text-body-1 text-medium-emphasis mt-1">Ваше пространство для общения</p>
-      </div>
-
-      <OverlayScrollbarsComponent
-        class="actions-scroll"
-        :options="{ scrollbars: { autoHide: 'scroll', theme: 'os-theme-membrane' } }"
-        defer
-      >
-        <div class="actions-grid">
-          <NewMessageDialog>
-            <template #activator="{ props }">
-              <v-card
-                v-bind="props"
-                class="action-card"
-                rounded="xl"
-                variant="tonal"
-                color="primary"
-                ripple
-              >
-                <v-card-text class="action-card-content">
-                  <v-icon icon="mdi-message-plus-outline" size="32" />
-                  <span class="text-body-1 font-weight-medium mt-3">Написать сообщение</span>
-                </v-card-text>
-              </v-card>
-            </template>
-          </NewMessageDialog>
-
-          <v-card
-            class="action-card"
-            rounded="xl"
-            variant="tonal"
-            color="secondary"
-            ripple
-          >
-            <v-card-text class="action-card-content">
-              <v-icon icon="mdi-layers-plus" size="32" />
-              <span class="text-body-1 font-weight-medium mt-3">Создать пространство</span>
-            </v-card-text>
-          </v-card>
-
-          <SettingsDialog>
-            <template #activator="{ props }">
-              <v-card
-                v-bind="props"
-                class="action-card"
-                rounded="xl"
-                variant="tonal"
-                color="tertiary"
-                ripple
-              >
-                <v-card-text class="action-card-content">
-                  <v-icon icon="mdi-cog-outline" size="32" />
-                  <span class="text-body-1 font-weight-medium mt-3">Настройки</span>
-                </v-card-text>
-              </v-card>
-            </template>
-          </SettingsDialog>
-
-          <v-card
-            class="action-card"
-            rounded="xl"
-            variant="tonal"
-            color="surface-variant"
-            ripple
-          >
-            <v-card-text class="action-card-content">
-              <v-icon icon="mdi-magnify" size="32" />
-              <span class="text-body-1 font-weight-medium mt-3">Найти людей</span>
-            </v-card-text>
-          </v-card>
+    <ChannelList />
+    <div class="home-view">
+        <div class="home-content">
+        <div class="home-header">
+            <v-icon icon="mdi-alpha-m-box" size="48" color="primary" class="mb-2" />
+            <h1 class="text-h4 font-weight-bold">Membrane</h1>
+            <p class="text-body-1 text-medium-emphasis mt-1">Ваше пространство для общения</p>
         </div>
-      </OverlayScrollbarsComponent>
+
+        <OverlayScrollbarsComponent
+            class="actions-scroll"
+            :options="{ scrollbars: { autoHide: 'scroll', theme: 'os-theme-membrane' } }"
+            defer
+        >
+            <div class="actions-grid">
+            <NewMessageDialog>
+                <template #activator="{ props }">
+                <v-card
+                    v-bind="props"
+                    class="action-card"
+                    rounded="xl"
+                    variant="tonal"
+                    color="primary"
+                    ripple
+                >
+                    <v-card-text class="action-card-content">
+                    <v-icon icon="mdi-message-plus-outline" size="32" />
+                    <span class="text-body-1 font-weight-medium mt-3">Написать сообщение</span>
+                    </v-card-text>
+                </v-card>
+                </template>
+            </NewMessageDialog>
+
+            <v-card
+                class="action-card"
+                rounded="xl"
+                variant="tonal"
+                color="secondary"
+                ripple
+            >
+                <v-card-text class="action-card-content">
+                <v-icon icon="mdi-layers-plus" size="32" />
+                <span class="text-body-1 font-weight-medium mt-3">Создать пространство</span>
+                </v-card-text>
+            </v-card>
+
+            <SettingsDialog>
+                <template #activator="{ props }">
+                <v-card
+                    v-bind="props"
+                    class="action-card"
+                    rounded="xl"
+                    variant="tonal"
+                    color="tertiary"
+                    ripple
+                >
+                    <v-card-text class="action-card-content">
+                    <v-icon icon="mdi-cog-outline" size="32" />
+                    <span class="text-body-1 font-weight-medium mt-3">Настройки</span>
+                    </v-card-text>
+                </v-card>
+                </template>
+            </SettingsDialog>
+
+            <v-card
+                class="action-card"
+                rounded="xl"
+                variant="tonal"
+                color="surface-variant"
+                ripple
+            >
+                <v-card-text class="action-card-content">
+                <v-icon icon="mdi-magnify" size="32" />
+                <span class="text-body-1 font-weight-medium mt-3">Найти людей</span>
+                </v-card-text>
+            </v-card>
+            </div>
+        </OverlayScrollbarsComponent>
+        </div>
     </div>
-  </div>
 </template>
 
 <style scoped>

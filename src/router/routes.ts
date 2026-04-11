@@ -9,13 +9,13 @@ export const settingsRoute = createRoute({
 
 export const homeRoute = createRoute({
   name: 'home',
-  path: '/[?chatId]',
+  path: '/',
   component: defineAsyncComponent(() => import('@/views/HomeView.vue')),
 })
 
 export const workspaceRoute = createRoute({
   name: 'workspace',
-  path: '/workspace/[workspaceId]/[?chatId]',
+  path: '/workspace/[workspaceId]',
   component: defineAsyncComponent(() => import('@/views/ChatsView.vue')),
 })
 

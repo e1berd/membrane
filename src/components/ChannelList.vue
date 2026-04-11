@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 
 const props = defineProps<{
-  chatId?: string
   workspaceId?: string
 }>()
 
@@ -11,35 +10,7 @@ const emit = defineEmits<{
 }>()
 
 const search = ref('')
-const channelsExpanded = ref(true)
-const dmsExpanded = ref(true)
 
-const channels = ref([
-  { id: 'general', name: 'general', unread: 3 },
-  { id: 'random', name: 'random', unread: 0 },
-  { id: 'dev', name: 'разработка', unread: 12 },
-  { id: 'design', name: 'дизайн', unread: 0 },
-  { id: 'announcements', name: 'объявления', unread: 1 },
-])
-
-const directMessages = ref([
-  { id: 'dm-1', name: 'Алексей Иванов', avatar: 'А', online: true, unread: 2 },
-  { id: 'dm-2', name: 'Мария Петрова', avatar: 'М', online: true, unread: 0 },
-  { id: 'dm-3', name: 'Дмитрий Козлов', avatar: 'Д', online: false, unread: 0 },
-  { id: 'dm-4', name: 'Елена Смирнова', avatar: 'Е', online: false, unread: 5 },
-])
-
-const filteredChats = computed(() => {
-  if (!search.value) return channels.value
-  const q = search.value.toLowerCase()
-  return channels.value.filter(c => c.name.toLowerCase().includes(q))
-})
-
-const filteredDms = computed(() => {
-  if (!search.value) return directMessages.value
-  const q = search.value.toLowerCase()
-  return directMessages.value.filter(d => d.name.toLowerCase().includes(q))
-})
 </script>
 
 <template>
@@ -75,127 +46,6 @@ const filteredDms = computed(() => {
       />
     </div>
 
-    <v-list density="compact" nav class="px-2">
-      <v-list-item
-        prepend-icon="mdi-message-text-outline"
-        title="Все сообщения"
-        rounded="lg"
-        class="mb-1"
-      />
-      <v-list-item
-        prepend-icon="mdi-at"
-        title="Упоминания"
-        rounded="lg"
-        class="mb-1"
-      >
-        <template #append>
-          <v-badge color="error" content="3" inline />
-        </template>
-      </v-list-item>
-    </v-list>
-
-    <v-divider class="mx-3 my-1" />
-
-    <v-list density="compact" nav class="px-2">
-      <v-list-item
-        rounded="lg"
-        class="section-header"
-        @click="channelsExpanded = !channelsExpanded"
-      >
-        <template #prepend>
-          <v-icon :icon="channelsExpanded ? 'mdi-chevron-down' : 'mdi-chevron-right'" size="18" />
-        </template>
-        <v-list-item-title class="text-label-large font-weight-medium">
-          Каналы
-        </v-list-item-title>
-        <template #append>
-          <v-btn
-            icon="mdi-plus"
-            variant="text"
-            size="x-small"
-            color="on-surface-variant"
-            @click.stop
-          />
-        </template>
-      </v-list-item>
-
-      <v-expand-transition>
-        <div v-show="channelsExpanded">
-          <v-list-item
-            v-for="chat in filteredChats"
-            :key="chat.id"
-            :active="props.chatId === chat.id"
-            rounded="lg"
-            @click="emit('select', chat.id)"
-          >
-            <template #prepend>
-              <v-icon icon="mdi-pound" size="18" class="mr-n1" />
-            </template>
-            <v-list-item-title :class="{ 'font-weight-bold': chat.unread > 0 }">
-              {{ chat.name }}
-            </v-list-item-title>
-            <template v-if="chat.unread > 0" #append>
-              <v-badge color="primary" :content="chat.unread" inline />
-            </template>
-          </v-list-item>
-        </div>
-      </v-expand-transition>
-    </v-list>
-
-    <v-list density="compact" nav class="px-2">
-      <v-list-item
-        rounded="lg"
-        class="section-header"
-        @click="dmsExpanded = !dmsExpanded"
-      >
-        <template #prepend>
-          <v-icon :icon="dmsExpanded ? 'mdi-chevron-down' : 'mdi-chevron-right'" size="18" />
-        </template>
-        <v-list-item-title class="text-label-large font-weight-medium">
-          Личные сообщения
-        </v-list-item-title>
-        <template #append>
-          <v-btn
-            icon="mdi-plus"
-            variant="text"
-            size="x-small"
-            color="on-surface-variant"
-            @click.stop
-          />
-        </template>
-      </v-list-item>
-
-      <v-expand-transition>
-        <div v-show="dmsExpanded">
-          <v-list-item
-            v-for="dm in filteredDms"
-            :key="dm.id"
-            :active="props.chatId === dm.id"
-            rounded="lg"
-            @click="emit('select', dm.id)"
-          >
-            <template #prepend>
-              <v-badge
-                :color="dm.online ? 'primary' : 'outline'"
-                dot
-                location="bottom end"
-                bordered
-              >
-                <v-avatar size="28" color="surface-variant">
-                  <span class="text-caption">{{ dm.avatar }}</span>
-                </v-avatar>
-              </v-badge>
-            </template>
-            <v-list-item-title :class="{ 'font-weight-bold': dm.unread > 0 }">
-              {{ dm.name }}
-            </v-list-item-title>
-            <template v-if="dm.unread > 0" #append>
-              <v-badge color="primary" :content="dm.unread" inline />
-            </template>
-          </v-list-item>
-        </div>
-      </v-expand-transition>
-    </v-list>
   </v-navigation-drawer>
 </template>
 
