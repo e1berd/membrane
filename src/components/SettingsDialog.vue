@@ -19,7 +19,6 @@ const activeIndex = ref(
   props.defaultTab ? Math.max(0, categories.findIndex(c => c.id === props.defaultTab)) : 0
 )
 const prevIndex = ref(0)
-const activeId = computed(() => categories[activeIndex.value].id)
 const currentComponent = computed(() => categories[activeIndex.value].component)
 
 const transitionName = computed(() =>
