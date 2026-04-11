@@ -89,7 +89,7 @@ function getInitial(username: string) {
           />
 
 
-          <v-expand-y-transition>
+          <v-expand-transition>
             <div v-if="query.trim()" class="results-float">
                 <v-divider />
                 <v-list v-auto-animate density="comfortable" class="results-list pa-2">
@@ -126,7 +126,7 @@ function getInitial(username: string) {
                 </div>
                 </v-list>
             </div>
-          </v-expand-y-transition>
+          </v-expand-transition>
         </div>
       </div>
     </v-card>

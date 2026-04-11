@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent } from 'vue'
 import { useRoute } from '@kitbag/router'
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
+import 'overlayscrollbars/overlayscrollbars.css'
 import NewMessageDialog from '@/components/NewMessageDialog.vue'
 
 const ChatConversation = defineAsyncComponent(() => import('@/components/ChatConversation.vue'))
@@ -20,116 +22,132 @@ const chatId = computed(() => route.params?.chatId)
         <p class="text-body-1 text-medium-emphasis mt-1">Ваше пространство для общения</p>
       </div>
 
-      <div class="actions-grid">
-        <NewMessageDialog>
-          <template #activator="{ props }">
-            <v-card
-              v-bind="props"
-              class="action-card"
-              rounded="xl"
-              variant="tonal"
-              color="primary"
-              ripple
-            >
-              <v-card-text class="action-card-content">
-                <v-icon icon="mdi-message-plus-outline" size="32" />
-                <span class="text-body-1 font-weight-medium mt-3">Написать сообщение</span>
-              </v-card-text>
-            </v-card>
-          </template>
-        </NewMessageDialog>
+      <OverlayScrollbarsComponent
+        class="actions-scroll"
+        :options="{ scrollbars: { autoHide: 'scroll', theme: 'os-theme-membrane' } }"
+        defer
+      >
+        <div class="actions-grid">
+          <NewMessageDialog>
+            <template #activator="{ props }">
+              <v-card
+                v-bind="props"
+                class="action-card"
+                rounded="xl"
+                variant="tonal"
+                color="primary"
+                ripple
+              >
+                <v-card-text class="action-card-content">
+                  <v-icon icon="mdi-message-plus-outline" size="32" />
+                  <span class="text-body-1 font-weight-medium mt-3">Написать сообщение</span>
+                </v-card-text>
+              </v-card>
+            </template>
+          </NewMessageDialog>
 
-        <v-card
-          class="action-card"
-          rounded="xl"
-          variant="tonal"
-          color="secondary"
-          ripple
-        >
-          <v-card-text class="action-card-content">
-            <v-icon icon="mdi-layers-plus" size="32" />
-            <span class="text-body-1 font-weight-medium mt-3">Создать пространство</span>
-          </v-card-text>
-        </v-card>
+          <v-card
+            class="action-card"
+            rounded="xl"
+            variant="tonal"
+            color="secondary"
+            ripple
+          >
+            <v-card-text class="action-card-content">
+              <v-icon icon="mdi-layers-plus" size="32" />
+              <span class="text-body-1 font-weight-medium mt-3">Создать пространство</span>
+            </v-card-text>
+          </v-card>
 
-        <v-card
-          class="action-card"
-          rounded="xl"
-          variant="tonal"
-          color="tertiary"
-          ripple
-        >
-          <v-card-text class="action-card-content">
-            <v-icon icon="mdi-account-multiple-plus-outline" size="32" />
-            <span class="text-body-1 font-weight-medium mt-3">Пригласить участника</span>
-          </v-card-text>
-        </v-card>
+          <v-card
+            class="action-card"
+            rounded="xl"
+            variant="tonal"
+            color="tertiary"
+            ripple
+          >
+            <v-card-text class="action-card-content">
+              <v-icon icon="mdi-account-multiple-plus-outline" size="32" />
+              <span class="text-body-1 font-weight-medium mt-3">Пригласить участника</span>
+            </v-card-text>
+          </v-card>
 
-        <v-card
-          class="action-card"
-          rounded="xl"
-          variant="tonal"
-          color="surface-variant"
-          ripple
-        >
-          <v-card-text class="action-card-content">
-            <v-icon icon="mdi-magnify" size="32" />
-            <span class="text-body-1 font-weight-medium mt-3">Найти людей</span>
-          </v-card-text>
-        </v-card>
-      </div>
+          <v-card
+            class="action-card"
+            rounded="xl"
+            variant="tonal"
+            color="surface-variant"
+            ripple
+          >
+            <v-card-text class="action-card-content">
+              <v-icon icon="mdi-magnify" size="32" />
+              <span class="text-body-1 font-weight-medium mt-3">Найти людей</span>
+            </v-card-text>
+          </v-card>
+        </div>
+      </OverlayScrollbarsComponent>
     </div>
   </div>
 </template>
 
 <style scoped>
 .home-view {
+  container-type: inline-size;
   flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   height: 100%;
   padding: 24px;
-}
 
-.home-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 40px;
-  max-width: 480px;
-  width: 100%;
-}
+  .home-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    max-width: 480px;
+    width: 100%;
+    max-height: 100%;
+    overflow: hidden;
+  }
 
-.home-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
+  .home-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex-shrink: 0;
+  }
 
-.actions-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  width: 100%;
-}
+  .actions-scroll {
+    width: 100%;
+    overflow: hidden;
+  }
 
-.action-card {
-  cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
+  .actions-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    width: 100%;
+    padding-bottom: 4px;
+  }
 
-.action-card:hover {
-  transform: translateY(-2px);
-}
+  .action-card {
+    cursor: pointer;
+    transition: transform 0.15s ease;
 
-.action-card-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 28px 16px !important;
-  text-align: center;
+    &:hover { transform: translateY(-2px); }
+  }
+
+  .action-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 16px !important;
+    text-align: center;
+  }
+
+  @container (max-width: 360px) {
+    .actions-grid { grid-template-columns: 1fr; }
+  }
 }
 </style>
