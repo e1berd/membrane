@@ -82,7 +82,7 @@ function selectCategory(index: number) {
               defer
             >
               <transition :name="transitionName" mode="out-in">
-                <component :is="currentComponent" :key="activeId" />
+                <component :is="currentComponent" />
               </transition>
             </OverlayScrollbarsComponent>
           </div>
