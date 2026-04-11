@@ -15,17 +15,23 @@ export interface Profile {
 
 export interface Chat {
   id: string
-  name: string
-  is_group: boolean
+  type: 'direct' | 'group' | 'voice'
   created_at: string
 }
 
-export interface Message {
+export interface ChatMember {
+  chat_id: string
+  user_id: string
+  joined_at: string
+}
+
+export interface ChatMessage {
   id: string
   chat_id: string
-  sender_id: string
-  text: string
+  user_id: string
+  message_content: unknown | null
   created_at: string
+  reply_to_chat_message_id: string | null
 }
 
 export const profiles = withItemType<Profile>().defineCollection({
@@ -45,7 +51,7 @@ export const chats = withItemType<Chat>().defineCollection({
   name: 'chats',
 } as const)
 
-export const messages = withItemType<Message>().defineCollection({
+export const messages = withItemType<ChatMessage>().defineCollection({
   name: 'messages',
   formSchema: {
     create: z.object({
