@@ -1,9 +1,6 @@
 import { createRoute } from '@kitbag/router'
 import { defineAsyncComponent } from 'vue'
 
-const ChatsView = defineAsyncComponent(() => import('@/views/ChatsView.vue'))
-
-
 export const settingsRoute = createRoute({
   name: 'settings',
   path: '/settings',
@@ -13,13 +10,13 @@ export const settingsRoute = createRoute({
 export const homeRoute = createRoute({
   name: 'home',
   path: '/[?chatId]',
-  component: ChatsView,
+  component: defineAsyncComponent(() => import('@/views/HomeView.vue')),
 })
 
 export const workspaceRoute = createRoute({
   name: 'workspace',
   path: '/workspace/[workspaceId]/[?chatId]',
-  component: ChatsView,
+  component: defineAsyncComponent(() => import('@/views/ChatsView.vue')),
 })
 
 export const signInRoute = createRoute({

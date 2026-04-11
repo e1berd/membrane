@@ -1,0 +1,135 @@
+<script setup lang="ts">
+import { computed, defineAsyncComponent } from 'vue'
+import { useRoute } from '@kitbag/router'
+import NewMessageDialog from '@/components/NewMessageDialog.vue'
+
+const ChatConversation = defineAsyncComponent(() => import('@/components/ChatConversation.vue'))
+
+const route = useRoute('home')
+const chatId = computed(() => route.params?.chatId)
+</script>
+
+<template>
+  <ChatConversation v-if="chatId" :chat-id="chatId" />
+
+  <div v-else class="home-view">
+    <div class="home-content">
+      <div class="home-header">
+        <v-icon icon="mdi-alpha-m-box" size="48" color="primary" class="mb-2" />
+        <h1 class="text-h4 font-weight-bold">Membrane</h1>
+        <p class="text-body-1 text-medium-emphasis mt-1">Ваше пространство для общения</p>
+      </div>
+
+      <div class="actions-grid">
+        <NewMessageDialog>
+          <template #activator="{ props }">
+            <v-card
+              v-bind="props"
+              class="action-card"
+              rounded="xl"
+              variant="tonal"
+              color="primary"
+              ripple
+            >
+              <v-card-text class="action-card-content">
+                <v-icon icon="mdi-message-plus-outline" size="32" />
+                <span class="text-body-1 font-weight-medium mt-3">Написать сообщение</span>
+              </v-card-text>
+            </v-card>
+          </template>
+        </NewMessageDialog>
+
+        <v-card
+          class="action-card"
+          rounded="xl"
+          variant="tonal"
+          color="secondary"
+          ripple
+        >
+          <v-card-text class="action-card-content">
+            <v-icon icon="mdi-layers-plus" size="32" />
+            <span class="text-body-1 font-weight-medium mt-3">Создать пространство</span>
+          </v-card-text>
+        </v-card>
+
+        <v-card
+          class="action-card"
+          rounded="xl"
+          variant="tonal"
+          color="tertiary"
+          ripple
+        >
+          <v-card-text class="action-card-content">
+            <v-icon icon="mdi-account-multiple-plus-outline" size="32" />
+            <span class="text-body-1 font-weight-medium mt-3">Пригласить участника</span>
+          </v-card-text>
+        </v-card>
+
+        <v-card
+          class="action-card"
+          rounded="xl"
+          variant="tonal"
+          color="surface-variant"
+          ripple
+        >
+          <v-card-text class="action-card-content">
+            <v-icon icon="mdi-magnify" size="32" />
+            <span class="text-body-1 font-weight-medium mt-3">Найти людей</span>
+          </v-card-text>
+        </v-card>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.home-view {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 24px;
+}
+
+.home-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  max-width: 480px;
+  width: 100%;
+}
+
+.home-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+}
+
+.action-card {
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.action-card:hover {
+  transform: translateY(-2px);
+}
+
+.action-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 16px !important;
+  text-align: center;
+}
+</style>

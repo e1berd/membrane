@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import ChatConversation from '@/components/ChatConversation.vue'
 import ChannelList from '@/components/ChannelList.vue'
+import ChatConversation from '@/components/ChatConversation.vue'
 import { useRoute, useRouter } from '@kitbag/router'
 import { computed } from 'vue'
 

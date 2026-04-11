@@ -10,6 +10,7 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@formkit/auto-animate": "^0.9.0",
     "@kitbag/router": "^0.24.1",
     "@mdi/font": "^7.4.47",
     "@rstore/vue": "^0.8.4",
