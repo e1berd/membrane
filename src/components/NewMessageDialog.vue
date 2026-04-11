@@ -2,13 +2,11 @@
 import { supabase } from '@/lib/supabase'
 import type { Profile } from '@/rstore/collections'
 import { vAutoAnimate } from '@formkit/auto-animate/vue'
-import { useRouter } from '@kitbag/router'
 import { defineAsyncComponent, ref, useTemplateRef, watch } from 'vue'
 
 const NewMessageProfileResultItem = defineAsyncComponent(() => import('@/components/NewMessageProfileResultItem.vue'))
 const NewMessageSearchEmptyState = defineAsyncComponent(() => import('@/components/NewMessageSearchEmptyState.vue'))
 
-const router = useRouter()
 const dialog = ref(false)
 const searchInput = useTemplateRef<{ focus: () => void }>('searchInput')
 const query = ref('')
@@ -28,7 +26,7 @@ watch(query, (val) => {
     const { data } = await supabase
       .from('profiles')
       .select(
-        `
+        `id,
         username,bio,avatar_url,
         profile_color,updated_at,
         created_at,overlay_url
@@ -48,10 +46,6 @@ watch(dialog, (val) => {
   }
 })
 
-function selectUser(profile: Profile) {
-  dialog.value = false
-  router.push(`/${profile.id}`)
-}
 </script>
 
 <template>
@@ -114,7 +108,6 @@ function selectUser(profile: Profile) {
                   v-for="profile in results"
                   :key="profile.id"
                   :profile="profile"
-                  @select="selectUser"
                 />
 
                 <NewMessageSearchEmptyState

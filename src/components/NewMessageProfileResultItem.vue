@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import type { Profile } from '@/rstore/collections'
+import { useLink } from '@kitbag/router'
 
-defineProps<{
+const props = defineProps<{
   profile: Profile
-}>()
-
-const emit = defineEmits<{
-  select: [profile: Profile]
 }>()
 
 function getInitial(username: string) {
   return username.charAt(0).toUpperCase()
 }
+
+const { href, push } = useLink('direct', { directId: 'new', profileId: props.profile.id })
 </script>
 
 <template>
@@ -19,7 +18,8 @@ function getInitial(username: string) {
     rounded="lg"
     class="result-item"
     min-height="56"
-    @click="emit('select', profile)"
+    :to="href"
+    @click.prevent="push()"
   >
     <template #prepend>
       <v-avatar

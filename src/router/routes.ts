@@ -7,9 +7,16 @@ export const settingsRoute = createRoute({
   component: defineAsyncComponent(() => import('@/views/SettingsView.vue')),
 })
 
+export const directRoute = createRoute({
+  name: 'direct',
+  path: '/profile/[profileId]/direct/[directId]',
+  component: defineAsyncComponent(() => import('@/views/DirectView.vue')),
+})
+
 export const homeRoute = createRoute({
   name: 'home',
   path: '/',
+  children: [directRoute],
   component: defineAsyncComponent(() => import('@/views/HomeView.vue')),
 })
 
@@ -31,4 +38,4 @@ export const errorRoute = createRoute({
   component: defineAsyncComponent(() => import('@/views/ErrorView.vue')),
 })
 
-export const routes = <const>[signInRoute, errorRoute, settingsRoute, homeRoute, workspaceRoute]
+export const routes = <const>[signInRoute, errorRoute, settingsRoute, homeRoute, workspaceRoute, directRoute]
