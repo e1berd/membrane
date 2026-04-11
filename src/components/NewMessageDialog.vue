@@ -3,7 +3,10 @@ import { supabase } from '@/lib/supabase'
 import type { Profile } from '@/rstore/collections'
 import { vAutoAnimate } from '@formkit/auto-animate/vue'
 import { useRouter } from '@kitbag/router'
-import { ref, useTemplateRef, watch } from 'vue'
+import { defineAsyncComponent, ref, useTemplateRef, watch } from 'vue'
+
+const NewMessageProfileResultItem = defineAsyncComponent(() => import('@/components/NewMessageProfileResultItem.vue'))
+const NewMessageSearchEmptyState = defineAsyncComponent(() => import('@/components/NewMessageSearchEmptyState.vue'))
 
 const router = useRouter()
 const dialog = ref(false)
@@ -48,10 +51,6 @@ watch(dialog, (val) => {
 function selectUser(profile: Profile) {
   dialog.value = false
   router.push(`/${profile.id}`)
-}
-
-function getInitial(username: string) {
-  return username.charAt(0).toUpperCase()
 }
 </script>
 
@@ -111,64 +110,16 @@ function getInitial(username: string) {
                 density="comfortable"
                 class="results-list pa-2"
               >
-                <v-list-item
+                <NewMessageProfileResultItem
                   v-for="profile in results"
                   :key="profile.id"
-                  rounded="lg"
-                  class="result-item"
-                  min-height="56"
-                  @click="selectUser(profile)"
-                >
-                  <template #prepend>
-                    <v-avatar
-                      size="40"
-                      :color="profile.profile_color ?? 'primary'"
-                      class="mr-1"
-                    >
-                      <v-img
-                        v-if="profile.avatar_url"
-                        :src="profile.avatar_url"
-                      />
-                      <span v-else class="text-body-1 font-weight-medium">{{
-                        getInitial(profile.username)
-                      }}</span>
-                    </v-avatar>
-                  </template>
+                  :profile="profile"
+                  @select="selectUser"
+                />
 
-                  <v-list-item-title class="text-body-2 font-weight-medium">
-                    {{ profile.username }}
-                  </v-list-item-title>
-                  <v-list-item-subtitle
-                    v-if="profile.bio"
-                    class="text-caption mt-0"
-                  >
-                    {{ profile.bio }}
-                  </v-list-item-subtitle>
-
-                  <template #append>
-                    <v-icon
-                      icon="mdi-arrow-right"
-                      size="16"
-                      color="on-surface-variant"
-                      class="result-arrow"
-                    />
-                  </template>
-                </v-list-item>
-
-                <div
+                <NewMessageSearchEmptyState
                   v-if="!loading && results.length === 0"
-                  class="empty-state"
-                >
-                  <v-icon
-                    icon="mdi-account-search-outline"
-                    size="32"
-                    color="on-surface-variant"
-                    class="mb-2"
-                  />
-                  <span class="text-caption text-on-surface-variant">
-                    Пользователи не найдены
-                  </span>
-                </div>
+                />
               </v-list>
             </div>
           </v-expand-transition>
@@ -218,26 +169,6 @@ function getInitial(username: string) {
 .results-list {
   max-block-size: 300px;
   overflow-y: auto;
-}
-
-.result-item {
-  transition: background 0.12s ease;
-}
-
-.result-arrow {
-  opacity: 0;
-  transition: opacity 0.12s ease;
-}
-
-.result-item:hover .result-arrow {
-  opacity: 1;
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 24px 16px;
 }
 
 @supports not (color: color-mix(in srgb, black 50%, transparent)) {
