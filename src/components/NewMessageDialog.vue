@@ -165,9 +165,9 @@ function getInitial(username: string) {
                     color="on-surface-variant"
                     class="mb-2"
                   />
-                  <span class="text-caption text-on-surface-variant"
-                    >Пользователи не найдены</span
-                  >
+                  <span class="text-caption text-on-surface-variant">
+                    Пользователи не найдены
+                  </span>
                 </div>
               </v-list>
             </div>
