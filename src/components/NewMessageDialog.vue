@@ -3,10 +3,11 @@ import { supabase } from '@/lib/supabase'
 import type { Profile } from '@/rstore/collections'
 import { vAutoAnimate } from '@formkit/auto-animate/vue'
 import { useRouter } from '@kitbag/router'
-import { ref, watch } from 'vue'
+import { ref, useTemplateRef, watch } from 'vue'
 
 const router = useRouter()
 const dialog = ref(false)
+const searchInput = useTemplateRef<{ focus: () => void }>('searchInput')
 const query = ref('')
 const results = ref<Profile[]>([])
 const loading = ref(false)
@@ -50,7 +51,7 @@ function getInitial(username: string) {
 </script>
 
 <template>
-  <v-dialog v-model="dialog" max-width="440">
+  <v-dialog v-model="dialog" max-width="440" @after-enter="searchInput?.focus()">
     <template #activator="{ props: activatorProps }">
       <slot name="activator" :props="activatorProps" />
     </template>
@@ -79,9 +80,9 @@ function getInitial(username: string) {
             placeholder="Найти пользователя..."
             prepend-inner-icon="mdi-magnify"
             variant="solo"
+            ref="searchInput"
             flat
             rounded="0"
-            autofocus
             hide-details
             :loading="loading"
             class="search-field"
