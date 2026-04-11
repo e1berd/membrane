@@ -50,70 +50,84 @@ function getInitial(username: string) {
 </script>
 
 <template>
-  <v-dialog v-model="dialog" max-width="460">
+  <v-dialog v-model="dialog" max-width="440">
     <template #activator="{ props: activatorProps }">
       <slot name="activator" :props="activatorProps" />
     </template>
 
     <v-card rounded="xl" class="dialog-card">
-      <v-card-title class="px-4 pt-4 pb-2 text-body-1 font-weight-bold">
-        Новое сообщение
-      </v-card-title>
+      <div class="dialog-header">
+        <v-icon icon="mdi-message-plus-outline" size="16" color="on-surface-variant" />
+        <span class="text-caption font-weight-medium text-on-surface-variant">Новое сообщение</span>
+        <v-spacer />
+        <v-btn
+          icon="mdi-close"
+          variant="text"
+          size="x-small"
+          color="on-surface-variant"
+          rounded="lg"
+          @click="dialog = false"
+        />
+      </div>
 
-      <v-card-text class="px-4 pt-0 pb-3">
+      <v-divider />
+
+      <div class="search-area">
         <div class="search-wrapper">
           <v-text-field
             v-model="query"
             placeholder="Найти пользователя..."
             prepend-inner-icon="mdi-magnify"
-            variant="outlined"
-            density="compact"
-            rounded="lg"
+            variant="solo"
+            flat
+            rounded="0"
             autofocus
             hide-details
             :loading="loading"
+            class="search-field"
           />
 
-          <div v-if="query.trim()" class="results-float">
-            <v-card rounded="lg" elevation="4" class="results-card">
-              <v-list v-auto-animate density="compact" class="py-1">
+
+          <v-expand-y-transition>
+            <div v-if="query.trim()" class="results-float">
+                <v-divider />
+                <v-list v-auto-animate density="comfortable" class="results-list pa-2">
                 <v-list-item
-                  v-for="profile in results"
-                  :key="profile.id"
-                  rounded="lg"
-                  class="mx-1 my-1"
-                  @click="selectUser(profile)"
+                    v-for="profile in results"
+                    :key="profile.id"
+                    rounded="lg"
+                    class="result-item"
+                    min-height="56"
+                    @click="selectUser(profile)"
                 >
-                  <template #prepend>
-                    <v-avatar size="36" :color="profile.profile_color ?? 'primary'">
-                      <v-img v-if="profile.avatar_url" :src="profile.avatar_url" />
-                      <span v-else class="text-body-2 font-weight-medium">{{ getInitial(profile.username) }}</span>
+                    <template #prepend>
+                    <v-avatar size="40" :color="profile.profile_color ?? 'primary'" class="mr-1">
+                        <v-img v-if="profile.avatar_url" :src="profile.avatar_url" />
+                        <span v-else class="text-body-1 font-weight-medium">{{ getInitial(profile.username) }}</span>
                     </v-avatar>
-                  </template>
+                    </template>
 
-                  <v-list-item-title class="text-body-2 font-weight-medium">
+                    <v-list-item-title class="text-body-2 font-weight-medium">
                     {{ profile.username }}
-                  </v-list-item-title>
-                  <v-list-item-subtitle v-if="profile.bio" class="text-caption">
+                    </v-list-item-title>
+                    <v-list-item-subtitle v-if="profile.bio" class="text-caption mt-0">
                     {{ profile.bio }}
-                  </v-list-item-subtitle>
+                    </v-list-item-subtitle>
+
+                    <template #append>
+                    <v-icon icon="mdi-arrow-right" size="16" color="on-surface-variant" class="result-arrow" />
+                    </template>
                 </v-list-item>
 
-                <v-list-item v-if="!loading && results.length === 0" disabled>
-                  <v-list-item-title class="text-caption text-on-surface-variant text-center">
-                    Пользователи не найдены
-                  </v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </v-card>
-          </div>
+                <div v-if="!loading && results.length === 0" class="empty-state">
+                    <v-icon icon="mdi-account-search-outline" size="32" color="on-surface-variant" class="mb-2" />
+                    <span class="text-caption text-on-surface-variant">Пользователи не найдены</span>
+                </div>
+                </v-list>
+            </div>
+          </v-expand-y-transition>
         </div>
-      </v-card-text>
-
-      <v-card-actions class="px-4 pb-3 pt-0">
-        <v-spacer />
-        <v-btn variant="text" @click="dialog = false">Отмена</v-btn>
-      </v-card-actions>
+      </div>
     </v-card>
   </v-dialog>
 </template>
@@ -123,6 +137,22 @@ function getInitial(username: string) {
   overflow: visible;
 }
 
+.dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px 10px 16px;
+}
+
+.search-area {
+  position: relative;
+}
+
+.search-field :deep(.v-field__input) {
+  padding-block: 14px;
+  font-size: 0.9375rem;
+}
+
 .search-wrapper {
   position: relative;
 }
@@ -130,12 +160,42 @@ function getInitial(username: string) {
 .results-float {
   position: absolute;
   inset-inline: 0;
-  top: calc(100% + 6px);
+  top: 100%;
   z-index: 10;
+  background: rgb(var(--v-theme-surface));
+  border-radius: 0 0 16px 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px color-mix(in srgb, rgb(var(--v-theme-shadow)) 12%, transparent);
 }
 
-.results-card {
-  max-block-size: 320px;
+.results-list {
+  max-block-size: 300px;
   overflow-y: auto;
+}
+
+.result-item {
+  transition: background 0.12s ease;
+}
+
+.result-arrow {
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.result-item:hover .result-arrow {
+  opacity: 1;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px;
+}
+
+@supports not (color: color-mix(in srgb, black 50%, transparent)) {
+  .results-float {
+    box-shadow: 0 8px 24px rgba(var(--v-theme-shadow), 0.12);
+  }
 }
 </style>
