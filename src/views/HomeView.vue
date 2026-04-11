@@ -1,20 +1,13 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent } from 'vue'
-import { useRoute } from '@kitbag/router'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
 import 'overlayscrollbars/overlayscrollbars.css'
 import NewMessageDialog from '@/components/NewMessageDialog.vue'
+import SettingsDialog from '@/components/SettingsDialog.vue'
 
-const ChatConversation = defineAsyncComponent(() => import('@/components/ChatConversation.vue'))
-
-const route = useRoute('home')
-const chatId = computed(() => route.params?.chatId)
 </script>
 
 <template>
-  <ChatConversation v-if="chatId" :chat-id="chatId" />
-
-  <div v-else class="home-view">
+  <div class="home-view">
     <div class="home-content">
       <div class="home-header">
         <v-icon icon="mdi-alpha-m-box" size="48" color="primary" class="mb-2" />
@@ -59,18 +52,23 @@ const chatId = computed(() => route.params?.chatId)
             </v-card-text>
           </v-card>
 
-          <v-card
-            class="action-card"
-            rounded="xl"
-            variant="tonal"
-            color="tertiary"
-            ripple
-          >
-            <v-card-text class="action-card-content">
-              <v-icon icon="mdi-account-multiple-plus-outline" size="32" />
-              <span class="text-body-1 font-weight-medium mt-3">Пригласить участника</span>
-            </v-card-text>
-          </v-card>
+          <SettingsDialog>
+            <template #activator="{ props }">
+              <v-card
+                v-bind="props"
+                class="action-card"
+                rounded="xl"
+                variant="tonal"
+                color="tertiary"
+                ripple
+              >
+                <v-card-text class="action-card-content">
+                  <v-icon icon="mdi-cog-outline" size="32" />
+                  <span class="text-body-1 font-weight-medium mt-3">Настройки</span>
+                </v-card-text>
+              </v-card>
+            </template>
+          </SettingsDialog>
 
           <v-card
             class="action-card"
