@@ -29,9 +29,9 @@ const { href, push } = useLink('direct', { directId: 'new', profileId: props.pro
         class="mr-1"
       >
         <v-img v-if="profile.avatar_url" :src="profile.avatar_url" />
-        <span v-else class="text-body-1 font-weight-medium">{{
-          getInitial(profile.username)
-        }}</span>
+        <span v-else class="text-body-1 font-weight-medium">
+          {{ getInitial(profile.username) }}
+        </span>
       </v-avatar>
     </template>
 
