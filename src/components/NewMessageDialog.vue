@@ -24,11 +24,13 @@ watch(query, (val) => {
   searchTimeout = setTimeout(async () => {
     const { data } = await supabase
       .from('profiles')
-      .select(`
+      .select(
+        `
         username,bio,avatar_url,
         profile_color,updated_at,
         created_at,overlay_url
-      `)
+      `,
+      )
       .ilike('username', `%${val.trim()}%`)
       .limit(10)
     results.value = (data ?? []) as Profile[]
@@ -51,19 +53,28 @@ function selectUser(profile: Profile) {
 function getInitial(username: string) {
   return username.charAt(0).toUpperCase()
 }
-
 </script>
 
 <template>
-  <v-dialog v-model="dialog" max-width="440" @after-enter="searchInput?.focus()">
+  <v-dialog
+    v-model="dialog"
+    max-width="440"
+    @after-enter="searchInput?.focus()"
+  >
     <template #activator="{ props: activatorProps }">
       <slot name="activator" :props="activatorProps" />
     </template>
 
     <v-card rounded="xl" class="dialog-card">
       <div class="dialog-header">
-        <v-icon icon="mdi-message-plus-outline" size="16" color="on-surface-variant" />
-        <span class="text-caption font-weight-medium text-on-surface-variant">Новое сообщение</span>
+        <v-icon
+          icon="mdi-message-plus-outline"
+          size="16"
+          color="on-surface-variant"
+        />
+        <span class="text-caption font-weight-medium text-on-surface-variant"
+          >Новое сообщение</span
+        >
         <v-spacer />
         <v-btn
           icon="mdi-close"
@@ -92,43 +103,73 @@ function getInitial(username: string) {
             class="search-field"
           />
 
-
           <v-expand-transition>
             <div v-if="query.trim()" class="results-float">
-                <v-divider />
-                <v-list v-auto-animate density="comfortable" class="results-list pa-2">
+              <v-divider />
+              <v-list
+                v-auto-animate
+                density="comfortable"
+                class="results-list pa-2"
+              >
                 <v-list-item
-                    v-for="profile in results"
-                    :key="profile.id"
-                    rounded="lg"
-                    class="result-item"
-                    min-height="56"
-                    @click="selectUser(profile)"
+                  v-for="profile in results"
+                  :key="profile.id"
+                  rounded="lg"
+                  class="result-item"
+                  min-height="56"
+                  @click="selectUser(profile)"
                 >
-                    <template #prepend>
-                    <v-avatar size="40" :color="profile.profile_color ?? 'primary'" class="mr-1">
-                        <v-img v-if="profile.avatar_url" :src="profile.avatar_url" />
-                        <span v-else class="text-body-1 font-weight-medium">{{ getInitial(profile.username) }}</span>
+                  <template #prepend>
+                    <v-avatar
+                      size="40"
+                      :color="profile.profile_color ?? 'primary'"
+                      class="mr-1"
+                    >
+                      <v-img
+                        v-if="profile.avatar_url"
+                        :src="profile.avatar_url"
+                      />
+                      <span v-else class="text-body-1 font-weight-medium">{{
+                        getInitial(profile.username)
+                      }}</span>
                     </v-avatar>
-                    </template>
+                  </template>
 
-                    <v-list-item-title class="text-body-2 font-weight-medium">
+                  <v-list-item-title class="text-body-2 font-weight-medium">
                     {{ profile.username }}
-                    </v-list-item-title>
-                    <v-list-item-subtitle v-if="profile.bio" class="text-caption mt-0">
+                  </v-list-item-title>
+                  <v-list-item-subtitle
+                    v-if="profile.bio"
+                    class="text-caption mt-0"
+                  >
                     {{ profile.bio }}
-                    </v-list-item-subtitle>
+                  </v-list-item-subtitle>
 
-                    <template #append>
-                    <v-icon icon="mdi-arrow-right" size="16" color="on-surface-variant" class="result-arrow" />
-                    </template>
+                  <template #append>
+                    <v-icon
+                      icon="mdi-arrow-right"
+                      size="16"
+                      color="on-surface-variant"
+                      class="result-arrow"
+                    />
+                  </template>
                 </v-list-item>
 
-                <div v-if="!loading && results.length === 0" class="empty-state">
-                    <v-icon icon="mdi-account-search-outline" size="32" color="on-surface-variant" class="mb-2" />
-                    <span class="text-caption text-on-surface-variant">Пользователи не найдены</span>
+                <div
+                  v-if="!loading && results.length === 0"
+                  class="empty-state"
+                >
+                  <v-icon
+                    icon="mdi-account-search-outline"
+                    size="32"
+                    color="on-surface-variant"
+                    class="mb-2"
+                  />
+                  <span class="text-caption text-on-surface-variant"
+                    >Пользователи не найдены</span
+                  >
                 </div>
-                </v-list>
+              </v-list>
             </div>
           </v-expand-transition>
         </div>
@@ -170,7 +211,8 @@ function getInitial(username: string) {
   background: rgb(var(--v-theme-surface));
   border-radius: 0 0 16px 16px;
   overflow: hidden;
-  box-shadow: 0 8px 24px color-mix(in srgb, rgb(var(--v-theme-shadow)) 12%, transparent);
+  box-shadow: 0 8px 24px
+    color-mix(in srgb, rgb(var(--v-theme-shadow)) 12%, transparent);
 }
 
 .results-list {
