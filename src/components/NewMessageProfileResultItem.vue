@@ -20,6 +20,7 @@ const { href, push } = useLink('direct', { directId: 'new', profileId: props.pro
     min-height="56"
     :to="href"
     @click.prevent="push()"
+    @keydown.enter.prevent="push()"
   >
     <template #prepend>
       <v-avatar
