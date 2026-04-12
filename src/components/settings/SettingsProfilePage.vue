@@ -271,12 +271,14 @@ loadProfile()
           class="mb-2"
         />
 
-        <v-text-field
+        <v-textarea
           v-model="profile.bio"
-          label="О себе"
+          label="Bio"
           density="compact"
           variant="outlined"
           placeholder="Расскажите о себе..."
+          rows="3"
+          auto-grow
           class="mb-3"
         />
 
