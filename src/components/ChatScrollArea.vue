@@ -25,9 +25,15 @@ function getViewport() {
 }
 
 function doScrollToBottom(vp: HTMLElement, smooth = false) {
+  scrollViewport?.removeEventListener('scroll', onScroll)
   vp.scrollTo({ top: vp.scrollHeight, behavior: smooth ? 'smooth' : 'instant' })
   showScrollButton.value = false
   isAtBottom = true
+  scrollViewport?.addEventListener('scrollend', () => {
+    scrollViewport?.addEventListener('scroll', onScroll, { passive: true })
+  }, {
+    once: true
+  })
 }
 
 function onScroll() {
