@@ -2,6 +2,7 @@
 import { ref, computed, nextTick, watch, useTemplateRef, defineAsyncComponent } from 'vue'
 import type { ReplyInfo } from '@/components/MessageItem.vue'
 import { useCurrentProfile } from '@/composables/useCurrentProfile'
+import type { Json } from '@/lib/database.types'
 
 const MemberList = defineAsyncComponent(() => import('@/components/MemberList.vue'))
 const ChatScrollArea = defineAsyncComponent(() => import('@/components/ChatScrollArea.vue'))
@@ -47,7 +48,7 @@ interface ChatMessage {
   text: string
   time: string
   color: string
-  is_read: boolean | null
+  is_read: boolean
   replyTo?: ReplyInfo
 }
 
@@ -83,6 +84,7 @@ const messages = ref<ChatMessage[]>([
     text: 'Я закончил рефакторинг модуля авторизации, всё прошло чисто',
     time: '2026-04-10T09:30:30',
     color: 'primary',
+    is_read: false,
   },
   {
     id: '3',
@@ -118,6 +120,7 @@ const messages = ref<ChatMessage[]>([
     text: 'Супер, спасибо! К пятнице нужно закрыть все критичные баги перед деплоем.',
     time: '2026-04-10T09:38:00',
     color: 'primary',
+    is_read: false,
   },
   {
     id: '7',
@@ -126,6 +129,7 @@ const messages = ref<ChatMessage[]>([
     text: 'Посмотрите, пожалуйста, макеты в Figma. Я обновила компоненты для тёмной темы 🎨',
     time: '2026-04-10T09:42:00',
     color: 'tertiary',
+    is_read: false,
   },
   {
     id: '8',
@@ -134,6 +138,7 @@ const messages = ref<ChatMessage[]>([
     text: 'Выглядит круто! Особенно карточки чатов',
     time: '2026-04-10T09:44:00',
     color: 'secondary',
+    is_read: false,
   },
   {
     id: '9',
@@ -142,6 +147,7 @@ const messages = ref<ChatMessage[]>([
     text: 'Только кнопку отправки можно сделать чуть крупнее на мобильных',
     time: '2026-04-10T09:44:20',
     color: 'secondary',
+    is_read: false,
   },
   {
     id: '10',
@@ -150,6 +156,7 @@ const messages = ref<ChatMessage[]>([
     text: 'Я нашла корень проблемы с WebSocket. Нужно добавить heartbeat с интервалом в 30 секунд и reconnect с экспоненциальным backoff.',
     time: '2026-04-10T10:05:00',
     color: 'error',
+    is_read: false,
   },
   {
     id: '11',
@@ -158,6 +165,7 @@ const messages = ref<ChatMessage[]>([
     text: 'Привет! Подключился к созвону поздно, что я пропустил?',
     time: '2026-04-10T10:15:00',
     color: 'secondary',
+    is_read: false,
   },
   {
     id: '12',
@@ -166,6 +174,7 @@ const messages = ref<ChatMessage[]>([
     text: 'Игорь, коротко: релиз в пятницу, Елена чинит WebSocket, Маша обновляет дизайн. Остальное в треде.',
     time: '2026-04-10T10:16:00',
     color: 'primary',
+    is_read: false,
   },
   {
     id: '13',
@@ -174,6 +183,7 @@ const messages = ref<ChatMessage[]>([
     text: 'Понял, спасибо! Я тогда возьму оптимизацию запросов к БД, там есть пара N+1',
     time: '2026-04-10T10:18:00',
     color: 'secondary',
+    is_read: false,
   },
   {
     id: '14',
@@ -182,6 +192,7 @@ const messages = ref<ChatMessage[]>([
     text: 'Кстати, я добавила новые иконки в дизайн-систему. Все Material Symbols, как мы договаривались.',
     time: '2026-04-10T10:25:00',
     color: 'tertiary',
+    is_read: false,
   },
   {
     id: '15',
@@ -190,6 +201,7 @@ const messages = ref<ChatMessage[]>([
     text: 'Класс! А что насчёт анимаций переходов между экранами? Мы их оставляем на следующий спринт?',
     time: '2026-04-10T10:30:00',
     color: 'secondary',
+    is_read: false,
   },
   {
     id: '16',
@@ -198,6 +210,7 @@ const messages = ref<ChatMessage[]>([
     text: 'Да, анимации — следующий спринт. Сейчас фокус на стабильности.',
     time: '2026-04-10T10:31:00',
     color: 'primary',
+    is_read: false,
   },
 ])
 
@@ -220,7 +233,7 @@ function shouldShowHeader(index: number): boolean {
   return currTime - prevTime > 5 * 60 * 1000
 }
 
-function onSend(html: string) {
+function onSend(contentJson: Json) {
   const p = currentProfile.value
   messages.value.push({
     id: String(Date.now()),
@@ -230,10 +243,11 @@ function onSend(html: string) {
     avatar_url: p?.avatar_url ?? null,
     overlay_url: p?.overlay_url ?? null,
     bio: p?.bio ?? null,
-    text: html,
+    message_content: JSON.stringify(contentJson),
     time: new Date().toISOString(),
     color: p?.profile_color ?? 'primary',
     replyTo: replyingTo.value ?? undefined,
+    is_read: false,
   })
   replyingTo.value = null
 }
