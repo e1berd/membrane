@@ -18,7 +18,14 @@ const { profile } = useCurrentProfile()
 
 const profileId = computed(() => profile.value?.id)
 
-const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
+const {
+  data,
+  isLoading,
+  error,
+  fetchNextPage,
+  hasNextPage,
+  isFetchingNextPage
+} = useInfiniteQuery({
   queryKey: ['chats', profileId],
   queryFn: async ({ pageParam }) => {
     const from = pageParam * PAGE_SIZE
