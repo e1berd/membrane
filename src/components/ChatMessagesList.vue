@@ -82,4 +82,9 @@ onBeforeMount(() => {
 .message-enter-to {
   opacity: 1;
 }
+
+ul {
+  list-style: none;
+  padding-inline-start: 0px;
+}
 </style>
