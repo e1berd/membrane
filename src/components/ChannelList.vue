@@ -1,17 +1,14 @@
 <script setup lang="ts">
 import ChatList from '@/components/ChatList.vue'
+import ComposeActionMenu from '@/components/ComposeActionMenu.vue'
 import { useCurrentProfile } from '@/composables/useCurrentProfile'
 import { supabase } from '@/lib/supabase'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/vue-query'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 
-const props = defineProps<{
+defineProps<{
   workspaceId?: string
-}>()
-
-const emit = defineEmits<{
-  select: [channel: string]
 }>()
 
 const PAGE_SIZE = 20
@@ -85,12 +82,7 @@ onUnmounted(() => {
     <div class="pa-3 pb-1">
       <div class="d-flex align-center justify-space-between mb-3">
         <span class="text-title-medium font-weight-bold">Membrane</span>
-        <v-btn
-          icon="mdi-square-edit-outline"
-          variant="text"
-          size="small"
-          color="on-surface-variant"
-        />
+        <ComposeActionMenu />
       </div>
 
       <v-text-field
