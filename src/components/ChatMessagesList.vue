@@ -1,21 +1,19 @@
 <script setup lang="ts">
 import MessageItem from '@/components/MessageItem.vue'
 import type { ReplyInfo } from '@/components/MessageItem.vue'
+import type { Tables } from '@/lib/database.types'
 import { onBeforeMount, ref } from 'vue'
 
-interface ChatMessage {
-  id: string
-  userId: string
-  sender: string
-  avatar: string
-  avatar_url?: string | null
-  overlay_url?: string | null
-  bio?: string | null
-  text: string
-  time: string
-  color: string
-  replyTo?: ReplyInfo
-}
+type ChatMessage = Pick<Tables<'chat_messages'>, 'id'> &
+  Pick<Tables<'profiles'>, 'avatar_url' | 'overlay_url' | 'bio'> & {
+    userId: string
+    sender: string
+    avatar: string
+    text: string
+    time: string
+    color: string
+    replyTo?: ReplyInfo
+  }
 
 defineProps<{
   messages: ChatMessage[]
