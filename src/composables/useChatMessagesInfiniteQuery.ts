@@ -3,38 +3,26 @@ import { useInfiniteQuery } from '@tanstack/vue-query'
 import { supabase } from '@/lib/supabase'
 import { messageContentToHtml } from '@/lib/messageContentToHtml'
 import type { ReplyInfo } from '@/components/MessageItem.vue'
+import type { Tables } from '@/lib/database.types'
 
 const PAGE_SIZE = 40
 
-export interface ChatMessage {
-  id: string
-  userId: string
-  sender: string
-  avatar: string
-  avatar_url?: string | null
-  overlay_url?: string | null
-  bio?: string | null
-  text: string
-  time: string
-  color: string
-  replyTo?: ReplyInfo
-}
+export type ChatMessage =
+  Pick<Tables<'chat_messages'>, 'id' | 'is_read'> &
+  Pick<Tables<'profiles'>, 'avatar_url' | 'overlay_url' | 'bio'> & {
+    userId: string
+    sender: string
+    avatar: string
+    text: string
+    time: string
+    color: string
+    replyTo?: ReplyInfo
+  }
 
-type ProfileRow = {
-  id: string
-  username: string
-  avatar_url: string | null
-  overlay_url: string | null
-  bio: string | null
-  profile_color: string | null
-}
+type ProfileRow = Pick<Tables<'profiles'>, 'id' | 'username' | 'avatar_url' | 'overlay_url' | 'bio' | 'profile_color'>
 
-type MessageRow = {
-  id: string
-  user_id: string
+type MessageRow = Pick<Tables<'chat_messages'>, 'id' | 'user_id' | 'created_at' | 'reply_to_chat_message_id' | 'is_read'> & {
   message_content: unknown
-  created_at: string | null
-  reply_to_chat_message_id: string | null
 }
 
 function profileInitial(p: ProfileRow): string {
@@ -44,7 +32,7 @@ function profileInitial(p: ProfileRow): string {
 async function fetchChatMessagesPage(chatId: string, offset: number): Promise<ChatMessage[]> {
   const { data: rows, error } = await supabase
     .from('chat_messages')
-    .select('id, user_id, message_content, created_at, reply_to_chat_message_id')
+    .select('id, user_id, message_content, is_read, created_at, reply_to_chat_message_id')
     .eq('chat_id', chatId)
     .order('created_at', { ascending: false })
     .order('id', { ascending: false })
@@ -92,6 +80,7 @@ async function fetchChatMessagesPage(chatId: string, offset: number): Promise<Ch
       text: messageContentToHtml(row.message_content),
       time: row.created_at ?? new Date().toISOString(),
       color: p?.profile_color ?? 'primary',
+      is_read: row.is_read,
       replyTo,
     }
   }

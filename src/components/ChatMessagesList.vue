@@ -4,7 +4,7 @@ import type { ReplyInfo } from '@/components/MessageItem.vue'
 import type { Tables } from '@/lib/database.types'
 import { onBeforeMount, ref } from 'vue'
 
-type ChatMessage = Pick<Tables<'chat_messages'>, 'id'> &
+type ChatMessage = Pick<Tables<'chat_messages'>, 'id' | 'is_read'> &
   Pick<Tables<'profiles'>, 'avatar_url' | 'overlay_url' | 'bio'> & {
     userId: string
     sender: string
@@ -62,6 +62,7 @@ onBeforeMount(() => {
       :color="msg.color"
       :show-header="shouldShowHeader(index)"
       :reply-to="msg.replyTo"
+      :is-read="msg.is_read"
       @reply="emit('reply', msg)"
       @scroll-to="emit('scrollTo', $event)"
     />

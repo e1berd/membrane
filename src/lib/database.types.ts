@@ -72,6 +72,7 @@ export type Database = {
           chat_id: string
           created_at: string | null
           id: string
+          is_read: boolean | null
           message_content: Json | null
           reply_to_chat_message_id: string | null
           user_id: string
@@ -80,6 +81,7 @@ export type Database = {
           chat_id: string
           created_at?: string | null
           id?: string
+          is_read?: boolean | null
           message_content?: Json | null
           reply_to_chat_message_id?: string | null
           user_id: string
@@ -88,6 +90,7 @@ export type Database = {
           chat_id?: string
           created_at?: string | null
           id?: string
+          is_read?: boolean | null
           message_content?: Json | null
           reply_to_chat_message_id?: string | null
           user_id?: string
@@ -311,4 +314,3 @@ export const Constants = {
     },
   },
 } as const
-

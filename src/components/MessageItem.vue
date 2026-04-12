@@ -22,6 +22,7 @@ const props = defineProps<{
   color?: string
   showHeader?: boolean
   replyTo?: ReplyInfo
+  isRead?: boolean | null  // is_read from DB (snake_case mapped by Vue prop binding)
 }>()
 
 const emit = defineEmits<{
@@ -64,7 +65,7 @@ function copyMessageContent() {
 <template>
   <li
     class="message-item px-4 py-1"
-    :class="{ 'pt-3': showHeader }"
+    :class="{ 'pt-3': showHeader, 'message-unread': props.isRead !== true }"
     @contextmenu="onContextMenu"
   >
     <div v-if="replyTo" class="d-flex align-center gap-2 reply-reference ml-12 mb-1">
@@ -137,6 +138,12 @@ function copyMessageContent() {
 <style scoped>
 .message-item {
   transition: background-color 0.15s ease;
+
+  &.message-unread {
+    background-color: color-mix(in srgb, rgb(var(--v-theme-primary)) 6%, transparent);
+    border-left: 2px solid color-mix(in srgb, rgb(var(--v-theme-primary)) 70%, transparent);
+    padding-left: calc(16px - 2px);
+  }
 
   .avatar-slot {
     inline-size: 36px;
@@ -213,6 +220,11 @@ function copyMessageContent() {
   .message-item {
     .reply-reference {
       border-left-color: rgba(var(--v-theme-primary), 0.6);
+    }
+
+    &.message-unread {
+      background-color: rgba(var(--v-theme-primary), 0.06);
+      border-left-color: rgba(var(--v-theme-primary), 0.7);
     }
   }
 

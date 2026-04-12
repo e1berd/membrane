@@ -202,6 +202,10 @@ const osRef = useTemplateRef<OverlayScrollbarsComponentRef>('osRef')
 const osReady = ref(false)
 const showScrollButton = ref(false)
 
+let scrollRafId: number | null = null
+let mounted = true
+onUnmounted(() => { mounted = false })
+
 function getViewport(): HTMLElement | undefined {
   return osRef.value?.osInstance()?.elements().viewport
 }
@@ -209,6 +213,11 @@ function getViewport(): HTMLElement | undefined {
 async function scrollToBottom(smooth = false) {
   await nextTick()
   await nextTick()
+  if (scrollRafId !== null) cancelAnimationFrame(scrollRafId)
+  await new Promise<void>(resolve => {
+    scrollRafId = requestAnimationFrame(() => { scrollRafId = null; resolve() })
+  })
+  if (!mounted) return
   const viewport = getViewport()
   if (viewport) {
     viewport.scrollTo({ top: viewport.scrollHeight, behavior: smooth ? 'smooth' : 'instant' })
@@ -240,6 +249,7 @@ watch(osReady, async (ready) => {
 
 onUnmounted(() => {
   scrollViewport?.removeEventListener('scroll', onMessagesScroll)
+  if (scrollRafId !== null) cancelAnimationFrame(scrollRafId)
 })
 
 
@@ -328,13 +338,15 @@ watch(() => props.chatId, () => {
           :options="{ scrollbars: { autoHide: 'scroll', theme: 'os-theme-membrane' } }"
           @os-initialized="osReady = true"
         >
-          <ChatMessagesList
-            :messages="messages"
-            :should-show-header="shouldShowHeader"
-            @reply="onReply"
-            @scroll-to="scrollToMessage"
-            @vue:mounted="scrollToBottom"
-          />
+          <div class="messages-content">
+            <ChatMessagesList
+              :messages="messages"
+              :should-show-header="shouldShowHeader"
+              @reply="onReply"
+              @scroll-to="scrollToMessage"
+              @vue:mounted="scrollToBottom"
+            />
+          </div>
         </OverlayScrollbarsComponent>
 
         <Transition name="scroll-btn">
@@ -379,6 +391,13 @@ watch(() => props.chatId, () => {
 
   .messages-area {
     overflow: hidden;
+  }
+
+  .messages-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 100%;
   }
 
   .scroll-to-bottom-btn {

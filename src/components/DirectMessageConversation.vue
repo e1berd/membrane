@@ -79,6 +79,10 @@ const osRef = useTemplateRef<OverlayScrollbarsComponentRef>('osRef')
 const osReady = ref(false)
 const showScrollButton = ref(false)
 
+let scrollRafId: number | null = null
+let mounted = true
+onUnmounted(() => { mounted = false })
+
 function getViewport(): HTMLElement | undefined {
   return osRef.value?.osInstance()?.elements().viewport
 }
@@ -86,7 +90,12 @@ function getViewport(): HTMLElement | undefined {
 async function scrollToBottom(smooth = false) {
   await nextTick()
   await nextTick()
-  const viewport = osRef.value?.osInstance()?.elements().viewport
+  if (scrollRafId !== null) cancelAnimationFrame(scrollRafId)
+  await new Promise<void>(resolve => {
+    scrollRafId = requestAnimationFrame(() => { scrollRafId = null; resolve() })
+  })
+  if (!mounted) return
+  const viewport = getViewport()
   if (viewport) {
     viewport.scrollTo({ top: viewport.scrollHeight, behavior: smooth ? 'smooth' : 'instant' })
     showScrollButton.value = false
@@ -189,6 +198,7 @@ watch(
 
 onUnmounted(() => {
   scrollViewport?.removeEventListener('scroll', onMessagesScroll)
+  if (scrollRafId !== null) cancelAnimationFrame(scrollRafId)
 })
 </script>
 
@@ -252,6 +262,7 @@ onUnmounted(() => {
       :options="{ scrollbars: { autoHide: 'scroll', theme: 'os-theme-membrane' } }"
       @os-initialized="osReady = true"
     >
+      <div class="messages-content">
       <template v-if="isNewChat">
         <div class="new-chat-welcome d-flex flex-column align-center justify-center">
           <v-avatar
@@ -294,6 +305,7 @@ onUnmounted(() => {
           Пока нет сообщений - напишите первым
         </div>
       </template>
+      </div>
     </OverlayScrollbarsComponent>
 
     <Transition name="scroll-btn">
@@ -331,6 +343,13 @@ onUnmounted(() => {
 
   .messages-area {
     overflow: hidden;
+  }
+
+  .messages-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 100%;
   }
 
   .scroll-to-bottom-btn {
