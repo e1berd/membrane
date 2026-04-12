@@ -10,6 +10,8 @@ const emit = defineEmits<{
   'load-more': []
 }>()
 
+const unmountAc = new AbortController()
+
 const osRef = useTemplateRef<OverlayScrollbarsComponentRef>('osRef')
 const contentRef = useTemplateRef<HTMLElement>('contentRef')
 const osReady = ref(false)
@@ -30,10 +32,16 @@ function doScrollToBottom(vp: HTMLElement, smooth = false) {
   showScrollButton.value = false
   isAtBottom = true
   scrollViewport?.addEventListener('scrollend', () => {
-    scrollViewport?.addEventListener('scroll', onScroll, { passive: true })
-  }, {
-    once: true
-  })
+      scrollViewport?.addEventListener(
+        'scroll',
+        onScroll,
+        { passive: true, signal: unmountAc.signal }
+      )
+    },
+    {
+      once: true,
+      signal: unmountAc.signal,
+    })
 }
 
 function onScroll() {
@@ -72,7 +80,7 @@ watch(osReady, (ready) => {
   const vp = getViewport()
   if (!vp) return
   scrollViewport = vp
-  vp.addEventListener('scroll', onScroll, { passive: true })
+  vp.addEventListener('scroll', onScroll, { passive: true, signal: unmountAc.signal })
 
   if (contentRef.value) {
     resizeObserver = new ResizeObserver(onContentResize)
@@ -83,6 +91,7 @@ watch(osReady, (ready) => {
 onUnmounted(() => {
   scrollViewport?.removeEventListener('scroll', onScroll)
   resizeObserver?.disconnect()
+  unmountAc.abort()
 })
 
 defineExpose({ scrollToBottom, reset })
