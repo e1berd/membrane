@@ -2,7 +2,7 @@ import { computed, type MaybeRefOrGetter, toValue } from 'vue'
 import { useInfiniteQuery } from '@tanstack/vue-query'
 import { supabase } from '@/lib/supabase'
 import { messageContentToHtml } from '@/lib/messageContentToHtml'
-import type { ReplyInfo } from '@/components/MessageItem.vue'
+import type { ReplyInfo } from '@/types'
 import type { Tables } from '@/lib/database.types'
 
 const PAGE_SIZE = 40

@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, nextTick, watch, useTemplateRef, defineAsyncComponent } from 'vue'
-import type { ReplyInfo } from '@/components/MessageItem.vue'
+import type { ReplyInfo } from '@/types'
 import { useCurrentProfile } from '@/composables/useCurrentProfile'
 import type { Json } from '@/lib/database.types'
+import type { ChatMessage } from '@/composables/useChatMessagesInfiniteQuery'
+import { messageContentToHtml } from '@/lib/messageContentToHtml'
 
 const MemberList = defineAsyncComponent(() => import('@/components/MemberList.vue'))
 const ChatScrollArea = defineAsyncComponent(() => import('@/components/ChatScrollArea.vue'))
@@ -37,20 +39,6 @@ const channelDescription = computed(() => {
   return map[props.chatId || 'general'] || ''
 })
 
-interface ChatMessage {
-  id: string
-  userId?: string
-  sender: string
-  avatar: string
-  avatar_url?: string | null
-  overlay_url?: string | null
-  bio?: string | null
-  text: string
-  time: string
-  color: string
-  is_read: boolean
-  replyTo?: ReplyInfo
-}
 
 const { profile: currentProfile } = useCurrentProfile()
 const replyingTo = ref<ReplyInfo | null>(null)
@@ -67,152 +55,7 @@ function cancelReply() {
   replyingTo.value = null
 }
 
-const messages = ref<ChatMessage[]>([
-  {
-    id: '1',
-    sender: 'Алексей Иванов',
-    avatar: 'А',
-    text: 'Привет всем! Как дела с новым релизом?',
-    time: '2026-04-10T09:30:00',
-    color: 'primary',
-    is_read: true,
-  },
-  {
-    id: '2',
-    sender: 'Алексей Иванов',
-    avatar: 'А',
-    text: 'Я закончил рефакторинг модуля авторизации, всё прошло чисто',
-    time: '2026-04-10T09:30:30',
-    color: 'primary',
-    is_read: false,
-  },
-  {
-    id: '3',
-    sender: 'Мария Петрова',
-    avatar: 'М',
-    text: 'Отлично! Я как раз тестирую новый дизайн. Скоро покажу макеты.',
-    time: '2026-04-10T09:32:00',
-    color: 'tertiary',
-    is_read: true,
-  },
-  {
-    id: '4',
-    sender: 'Дмитрий Козлов',
-    avatar: 'Д',
-    text: 'Кто-нибудь смотрел тикет #342? Там баг с уведомлениями на мобильных устройствах.',
-    time: '2026-04-10T09:35:00',
-    color: 'secondary',
-    is_read: true,
-  },
-  {
-    id: '5',
-    sender: 'Елена Смирнова',
-    avatar: 'Е',
-    text: 'Да, я взяла его в работу. Проблема в WebSocket-соединении — оно не переподключается после выхода из спящего режима.',
-    time: '2026-04-10T09:37:00',
-    color: 'error',
-    is_read: true,
-  },
-  {
-    id: '6',
-    sender: 'Алексей Иванов',
-    avatar: 'А',
-    text: 'Супер, спасибо! К пятнице нужно закрыть все критичные баги перед деплоем.',
-    time: '2026-04-10T09:38:00',
-    color: 'primary',
-    is_read: false,
-  },
-  {
-    id: '7',
-    sender: 'Мария Петрова',
-    avatar: 'М',
-    text: 'Посмотрите, пожалуйста, макеты в Figma. Я обновила компоненты для тёмной темы 🎨',
-    time: '2026-04-10T09:42:00',
-    color: 'tertiary',
-    is_read: false,
-  },
-  {
-    id: '8',
-    sender: 'Дмитрий Козлов',
-    avatar: 'Д',
-    text: 'Выглядит круто! Особенно карточки чатов',
-    time: '2026-04-10T09:44:00',
-    color: 'secondary',
-    is_read: false,
-  },
-  {
-    id: '9',
-    sender: 'Дмитрий Козлов',
-    avatar: 'Д',
-    text: 'Только кнопку отправки можно сделать чуть крупнее на мобильных',
-    time: '2026-04-10T09:44:20',
-    color: 'secondary',
-    is_read: false,
-  },
-  {
-    id: '10',
-    sender: 'Елена Смирнова',
-    avatar: 'Е',
-    text: 'Я нашла корень проблемы с WebSocket. Нужно добавить heartbeat с интервалом в 30 секунд и reconnect с экспоненциальным backoff.',
-    time: '2026-04-10T10:05:00',
-    color: 'error',
-    is_read: false,
-  },
-  {
-    id: '11',
-    sender: 'Игорь Волков',
-    avatar: 'И',
-    text: 'Привет! Подключился к созвону поздно, что я пропустил?',
-    time: '2026-04-10T10:15:00',
-    color: 'secondary',
-    is_read: false,
-  },
-  {
-    id: '12',
-    sender: 'Алексей Иванов',
-    avatar: 'А',
-    text: 'Игорь, коротко: релиз в пятницу, Елена чинит WebSocket, Маша обновляет дизайн. Остальное в треде.',
-    time: '2026-04-10T10:16:00',
-    color: 'primary',
-    is_read: false,
-  },
-  {
-    id: '13',
-    sender: 'Игорь Волков',
-    avatar: 'И',
-    text: 'Понял, спасибо! Я тогда возьму оптимизацию запросов к БД, там есть пара N+1',
-    time: '2026-04-10T10:18:00',
-    color: 'secondary',
-    is_read: false,
-  },
-  {
-    id: '14',
-    sender: 'Мария Петрова',
-    avatar: 'М',
-    text: 'Кстати, я добавила новые иконки в дизайн-систему. Все Material Symbols, как мы договаривались.',
-    time: '2026-04-10T10:25:00',
-    color: 'tertiary',
-    is_read: false,
-  },
-  {
-    id: '15',
-    sender: 'Дмитрий Козлов',
-    avatar: 'Д',
-    text: 'Класс! А что насчёт анимаций переходов между экранами? Мы их оставляем на следующий спринт?',
-    time: '2026-04-10T10:30:00',
-    color: 'secondary',
-    is_read: false,
-  },
-  {
-    id: '16',
-    sender: 'Алексей Иванов',
-    avatar: 'А',
-    text: 'Да, анимации — следующий спринт. Сейчас фокус на стабильности.',
-    time: '2026-04-10T10:31:00',
-    color: 'primary',
-    is_read: false,
-  },
-])
+const messages = ref<ChatMessage[]>([])
 
 const scrollAreaRef = useTemplateRef<InstanceType<typeof ChatScrollArea>>('scrollAreaRef')
 
@@ -237,13 +80,13 @@ function onSend(contentJson: Json) {
   const p = currentProfile.value
   messages.value.push({
     id: String(Date.now()),
-    userId: p?.id,
+    userId: p?.id ?? '',
     sender: p?.username ?? 'Вы',
     avatar: p ? p.username.charAt(0).toUpperCase() : 'U',
     avatar_url: p?.avatar_url ?? null,
     overlay_url: p?.overlay_url ?? null,
     bio: p?.bio ?? null,
-    message_content: JSON.stringify(contentJson),
+    text: messageContentToHtml(contentJson),
     time: new Date().toISOString(),
     color: p?.profile_color ?? 'primary',
     replyTo: replyingTo.value ?? undefined,
@@ -298,7 +141,7 @@ watch(() => props.chatId, () => {
           :messages="messages"
           :should-show-header="shouldShowHeader"
           @reply="onReply"
-          @scroll-to="scrollToMessage"
+          @scrollTo="scrollToMessage"
         />
       </ChatScrollArea>
 
