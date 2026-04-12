@@ -5,6 +5,7 @@ import 'overlayscrollbars/overlayscrollbars.css'
 
 const ProfilePage = defineAsyncComponent(() => import('@/components/settings/SettingsProfilePage.vue'))
 const AppearancePage = defineAsyncComponent(() => import('@/components/settings/SettingsAppearancePage.vue'))
+const AccountPage = defineAsyncComponent(() => import('@/components/settings/SettingsAccountPage.vue'))
 
 const props = defineProps<{
   defaultTab?: string
@@ -13,6 +14,7 @@ const props = defineProps<{
 const categories = [
   { id: 'appearance', label: 'Внешний вид', icon: 'mdi-palette-outline', component: AppearancePage },
   { id: 'profile', label: 'Профиль', icon: 'mdi-account-outline', component: ProfilePage },
+  { id: 'account', label: 'Аккаунт', icon: 'mdi-shield-account-outline', component: AccountPage },
 ]
 
 const activeIndex = ref(
