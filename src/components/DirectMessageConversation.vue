@@ -77,16 +77,20 @@ function cancelReply() {
 
 const osRef = useTemplateRef<OverlayScrollbarsComponentRef>('osRef')
 const osReady = ref(false)
+const showScrollButton = ref(false)
 
 function getViewport(): HTMLElement | undefined {
   return osRef.value?.osInstance()?.elements().viewport
 }
 
-async function scrollToBottom() {
+async function scrollToBottom(smooth = false) {
   await nextTick()
   await nextTick()
   const viewport = osRef.value?.osInstance()?.elements().viewport
-  if (viewport) viewport.scrollTop = viewport.scrollHeight
+  if (viewport) {
+    viewport.scrollTo({ top: viewport.scrollHeight, behavior: smooth ? 'smooth' : 'instant' })
+    showScrollButton.value = false
+  }
 }
 
 function scrollToMessage(id: string) {
@@ -158,7 +162,10 @@ watch(
 
 function onMessagesScroll() {
   const viewport = getViewport()
-  if (!viewport || isFetchingNextPage.value || !hasNextPage.value) return
+  if (!viewport) return
+  const distFromBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight
+  showScrollButton.value = distFromBottom > 100
+  if (isFetchingNextPage.value || !hasNextPage.value) return
   if (viewport.scrollTop < 100) fetchNextPage()
 }
 
@@ -238,9 +245,10 @@ onUnmounted(() => {
 
     <v-divider />
 
+    <div class="messages-wrapper flex-grow-1 position-relative">
     <OverlayScrollbarsComponent
       ref="osRef"
-      class="messages-area flex-grow-1 py-2"
+      class="messages-area h-100 py-2"
       :options="{ scrollbars: { autoHide: 'scroll', theme: 'os-theme-membrane' } }"
       @os-initialized="osReady = true"
     >
@@ -288,6 +296,19 @@ onUnmounted(() => {
       </template>
     </OverlayScrollbarsComponent>
 
+    <Transition name="scroll-btn">
+      <v-btn
+        v-if="showScrollButton"
+        icon="mdi-chevron-down"
+        class="scroll-to-bottom-btn"
+        size="small"
+        elevation="3"
+        color="surface-container-high"
+        @click="scrollToBottom(true)"
+      />
+    </Transition>
+    </div>
+
     <MessageEditor
       :channel-name="profile?.username ?? '...'"
       :reply-to="replyingTo"
@@ -304,8 +325,19 @@ onUnmounted(() => {
     border-bottom: none;
   }
 
+  .messages-wrapper {
+    overflow: hidden;
+  }
+
   .messages-area {
     overflow: hidden;
+  }
+
+  .scroll-to-bottom-btn {
+    position: absolute;
+    bottom: 12px;
+    right: 16px;
+    z-index: 10;
   }
 
   .cursor-pointer {
@@ -317,5 +349,16 @@ onUnmounted(() => {
     min-height: 200px;
     padding: 48px 24px;
   }
+}
+
+.scroll-btn-enter-active,
+.scroll-btn-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.scroll-btn-enter-from,
+.scroll-btn-leave-to {
+  opacity: 0;
+  transform: translateY(8px) scale(0.85);
 }
 </style>

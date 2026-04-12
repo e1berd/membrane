@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, nextTick, watch, useTemplateRef, defineAsyncComponent } from 'vue'
+import { ref, computed, nextTick, watch, onUnmounted, useTemplateRef, defineAsyncComponent } from 'vue'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
 import type { OverlayScrollbarsComponentRef } from 'overlayscrollbars-vue'
 import 'overlayscrollbars/overlayscrollbars.css'
@@ -200,13 +200,47 @@ const messages = ref<ChatMessage[]>([
 
 const osRef = useTemplateRef<OverlayScrollbarsComponentRef>('osRef')
 const osReady = ref(false)
+const showScrollButton = ref(false)
 
-async function scrollToBottom() {
-  await nextTick()
-  await nextTick()
-  const viewport = osRef.value?.osInstance()?.elements().viewport
-  if (viewport) viewport.scrollTop = viewport.scrollHeight
+function getViewport(): HTMLElement | undefined {
+  return osRef.value?.osInstance()?.elements().viewport
 }
+
+async function scrollToBottom(smooth = false) {
+  await nextTick()
+  await nextTick()
+  const viewport = getViewport()
+  if (viewport) {
+    viewport.scrollTo({ top: viewport.scrollHeight, behavior: smooth ? 'smooth' : 'instant' })
+    showScrollButton.value = false
+  }
+}
+
+function onMessagesScroll() {
+  const viewport = getViewport()
+  if (!viewport) return
+  const distFromBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight
+  showScrollButton.value = distFromBottom > 100
+}
+
+let scrollViewport: HTMLElement | undefined
+
+watch(osReady, async (ready) => {
+  if (!ready) return
+  await nextTick()
+  if (scrollViewport) {
+    scrollViewport.removeEventListener('scroll', onMessagesScroll)
+    scrollViewport = undefined
+  }
+  const viewport = getViewport()
+  if (!viewport) return
+  scrollViewport = viewport
+  viewport.addEventListener('scroll', onMessagesScroll, { passive: true })
+})
+
+onUnmounted(() => {
+  scrollViewport?.removeEventListener('scroll', onMessagesScroll)
+})
 
 
 function scrollToMessage(id: string) {
@@ -287,20 +321,34 @@ watch(() => props.chatId, () => {
 
       <v-divider />
 
-      <OverlayScrollbarsComponent
-        ref="osRef"
-        class="messages-area flex-grow-1 py-2"
-        :options="{ scrollbars: { autoHide: 'scroll', theme: 'os-theme-membrane' } }"
-        @os-initialized="osReady = true"
-      >
-        <ChatMessagesList
-          :messages="messages"
-          :should-show-header="shouldShowHeader"
-          @reply="onReply"
-          @scroll-to="scrollToMessage"
-          @vue:mounted="scrollToBottom"
-        />
-      </OverlayScrollbarsComponent>
+      <div class="messages-wrapper flex-grow-1 position-relative">
+        <OverlayScrollbarsComponent
+          ref="osRef"
+          class="messages-area h-100 py-2"
+          :options="{ scrollbars: { autoHide: 'scroll', theme: 'os-theme-membrane' } }"
+          @os-initialized="osReady = true"
+        >
+          <ChatMessagesList
+            :messages="messages"
+            :should-show-header="shouldShowHeader"
+            @reply="onReply"
+            @scroll-to="scrollToMessage"
+            @vue:mounted="scrollToBottom"
+          />
+        </OverlayScrollbarsComponent>
+
+        <Transition name="scroll-btn">
+          <v-btn
+            v-if="showScrollButton"
+            icon="mdi-chevron-down"
+            class="scroll-to-bottom-btn"
+            size="small"
+            elevation="3"
+            color="surface-container-high"
+            @click="scrollToBottom(true)"
+          />
+        </Transition>
+      </div>
 
       <MessageEditor
         :channel-name="channelName"
@@ -325,8 +373,19 @@ watch(() => props.chatId, () => {
     border-bottom: none;
   }
 
+  .messages-wrapper {
+    overflow: hidden;
+  }
+
   .messages-area {
     overflow: hidden;
+  }
+
+  .scroll-to-bottom-btn {
+    position: absolute;
+    bottom: 12px;
+    right: 16px;
+    z-index: 10;
   }
 
   .members-panel {
@@ -346,5 +405,16 @@ watch(() => props.chatId, () => {
       inline-size: 220px;
     }
   }
+}
+
+.scroll-btn-enter-active,
+.scroll-btn-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.scroll-btn-enter-from,
+.scroll-btn-leave-to {
+  opacity: 0;
+  transform: translateY(8px) scale(0.85);
 }
 </style>
