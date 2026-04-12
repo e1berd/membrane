@@ -12,7 +12,12 @@ import ChannelList from '@/components/ChannelList.vue'
     <div class="home-view">
         <div class="home-content">
         <div class="home-header">
-            <v-icon icon="mdi-alpha-m-box" size="48" color="primary" class="mb-2" />
+            <v-icon
+              icon="mdi-alpha-m-box"
+              size="48"
+              color="primary"
+              class="mb-2"
+            />
             <h1 class="text-h4 font-weight-bold">Membrane</h1>
             <p class="text-body-1 text-medium-emphasis mt-1">Ваше пространство для общения</p>
         </div>
