@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, nextTick, onUnmounted, watch, useTemplateRef, defineAsyncComponent, toRef } from 'vue'
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
-import type { OverlayScrollbarsComponentRef } from 'overlayscrollbars-vue'
-import 'overlayscrollbars/overlayscrollbars.css'
+import { ref, computed, nextTick, watch, useTemplateRef, defineAsyncComponent, toRef } from 'vue'
 import type { ReplyInfo } from '@/components/MessageItem.vue'
 import { supabase } from '@/lib/supabase'
 import type { Json } from '@/lib/database.types'
@@ -12,7 +9,7 @@ import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import type { JSONContent } from '@tiptap/vue-3'
 import { useRouter } from '@kitbag/router'
 
-
+const ChatScrollArea = defineAsyncComponent(() => import('@/components/ChatScrollArea.vue'))
 const ChatMessagesList = defineAsyncComponent(() => import('@/components/ChatMessagesList.vue'))
 const MessageEditor = defineAsyncComponent(() => import('@/components/MessageEditor.vue'))
 const UserProfileDialog = defineAsyncComponent(() => import('@/components/UserProfileDialog.vue'))
@@ -75,32 +72,7 @@ function cancelReply() {
   replyingTo.value = null
 }
 
-const osRef = useTemplateRef<OverlayScrollbarsComponentRef>('osRef')
-const osReady = ref(false)
-const showScrollButton = ref(false)
-
-let scrollRafId: number | null = null
-let mounted = true
-onUnmounted(() => { mounted = false })
-
-function getViewport(): HTMLElement | undefined {
-  return osRef.value?.osInstance()?.elements().viewport
-}
-
-async function scrollToBottom(smooth = false) {
-  await nextTick()
-  await nextTick()
-  if (scrollRafId !== null) cancelAnimationFrame(scrollRafId)
-  await new Promise<void>(resolve => {
-    scrollRafId = requestAnimationFrame(() => { scrollRafId = null; resolve() })
-  })
-  if (!mounted) return
-  const viewport = getViewport()
-  if (viewport) {
-    viewport.scrollTo({ top: viewport.scrollHeight, behavior: smooth ? 'smooth' : 'instant' })
-    showScrollButton.value = false
-  }
-}
+const scrollAreaRef = useTemplateRef<InstanceType<typeof ChatScrollArea>>('scrollAreaRef')
 
 function scrollToMessage(id: string) {
   nextTick(() => {
@@ -148,57 +120,14 @@ async function sendMessage(jsonContent: JSONContent) {
   if (error) throw error
   replyingTo.value = null
   await queryClient.invalidateQueries({ queryKey: ['chatMessages', chatId] })
-  await nextTick()
-  scrollToBottom()
 }
 
-const initialScrollDoneForChat = ref<string | null>(null)
-
-watch(dmChatId, (id) => {
-  if (!id) initialScrollDoneForChat.value = null
-})
-
-watch(
-  () => [dmChatId.value, messagesLoading.value, messages.value.length, osReady.value] as const,
-  ([cid, loading, n, ready]) => {
-    if (!cid || loading || n === 0 || !ready) return
-    if (initialScrollDoneForChat.value === cid) return
-    initialScrollDoneForChat.value = cid
-    scrollToBottom()
-  },
-  { flush: 'post' },
-)
-
-function onMessagesScroll() {
-  const viewport = getViewport()
-  if (!viewport) return
-  const distFromBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight
-  showScrollButton.value = distFromBottom > 100
-  if (isFetchingNextPage.value || !hasNextPage.value) return
-  if (viewport.scrollTop < 100) fetchNextPage()
+function onLoadMore() {
+  if (!isFetchingNextPage.value && hasNextPage.value) fetchNextPage()
 }
 
-let scrollViewport: HTMLElement | undefined
-
-watch(
-  () => [dmChatId.value, messagesLoading.value] as const,
-  async () => {
-    await nextTick()
-    if (scrollViewport) {
-      scrollViewport.removeEventListener('scroll', onMessagesScroll)
-      scrollViewport = undefined
-    }
-    const viewport = getViewport()
-    if (!viewport || isNewChat.value) return
-    scrollViewport = viewport
-    viewport.addEventListener('scroll', onMessagesScroll, { passive: true })
-  },
-  { immediate: true },
-)
-
-onUnmounted(() => {
-  scrollViewport?.removeEventListener('scroll', onMessagesScroll)
-  if (scrollRafId !== null) cancelAnimationFrame(scrollRafId)
+watch(dmChatId, () => {
+  scrollAreaRef.value?.reset()
 })
 </script>
 
@@ -255,14 +184,11 @@ onUnmounted(() => {
 
     <v-divider />
 
-    <div class="messages-wrapper flex-grow-1 position-relative">
-    <OverlayScrollbarsComponent
-      ref="osRef"
-      class="messages-area h-100 py-2"
-      :options="{ scrollbars: { autoHide: 'scroll', theme: 'os-theme-membrane' } }"
-      @os-initialized="osReady = true"
+    <ChatScrollArea
+      ref="scrollAreaRef"
+      class="flex-grow-1"
+      @load-more="onLoadMore"
     >
-      <div class="messages-content">
       <template v-if="isNewChat">
         <div class="new-chat-welcome d-flex flex-column align-center justify-center">
           <v-avatar
@@ -296,7 +222,6 @@ onUnmounted(() => {
           :should-show-header="shouldShowHeader"
           @reply="onReply"
           @scroll-to="scrollToMessage"
-          @vue:mounted="scrollToBottom"
         />
       </template>
 
@@ -305,21 +230,7 @@ onUnmounted(() => {
           Пока нет сообщений - напишите первым
         </div>
       </template>
-      </div>
-    </OverlayScrollbarsComponent>
-
-    <Transition name="scroll-btn">
-      <v-btn
-        v-if="showScrollButton"
-        icon="mdi-chevron-down"
-        class="scroll-to-bottom-btn"
-        size="small"
-        elevation="3"
-        color="surface-container-high"
-        @click="scrollToBottom(true)"
-      />
-    </Transition>
-    </div>
+    </ChatScrollArea>
 
     <MessageEditor
       :channel-name="profile?.username ?? '...'"
@@ -337,28 +248,6 @@ onUnmounted(() => {
     border-bottom: none;
   }
 
-  .messages-wrapper {
-    overflow: hidden;
-  }
-
-  .messages-area {
-    overflow: hidden;
-  }
-
-  .messages-content {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    min-height: 100%;
-  }
-
-  .scroll-to-bottom-btn {
-    position: absolute;
-    bottom: 12px;
-    right: 16px;
-    z-index: 10;
-  }
-
   .cursor-pointer {
     cursor: pointer;
   }
@@ -368,16 +257,5 @@ onUnmounted(() => {
     min-height: 200px;
     padding: 48px 24px;
   }
-}
-
-.scroll-btn-enter-active,
-.scroll-btn-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.scroll-btn-enter-from,
-.scroll-btn-leave-to {
-  opacity: 0;
-  transform: translateY(8px) scale(0.85);
 }
 </style>

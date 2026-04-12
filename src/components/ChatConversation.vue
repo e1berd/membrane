@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import { ref, computed, nextTick, watch, onUnmounted, useTemplateRef, defineAsyncComponent } from 'vue'
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
-import type { OverlayScrollbarsComponentRef } from 'overlayscrollbars-vue'
-import 'overlayscrollbars/overlayscrollbars.css'
+import { ref, computed, nextTick, watch, useTemplateRef, defineAsyncComponent } from 'vue'
 import type { ReplyInfo } from '@/components/MessageItem.vue'
 import { useCurrentProfile } from '@/composables/useCurrentProfile'
 
 const MemberList = defineAsyncComponent(() => import('@/components/MemberList.vue'))
+const ChatScrollArea = defineAsyncComponent(() => import('@/components/ChatScrollArea.vue'))
 const ChatMessagesList = defineAsyncComponent(() => import('@/components/ChatMessagesList.vue'))
 const MessageEditor = defineAsyncComponent(() => import('@/components/MessageEditor.vue'))
 
@@ -198,60 +196,7 @@ const messages = ref<ChatMessage[]>([
   },
 ])
 
-const osRef = useTemplateRef<OverlayScrollbarsComponentRef>('osRef')
-const osReady = ref(false)
-const showScrollButton = ref(false)
-
-let scrollRafId: number | null = null
-let mounted = true
-onUnmounted(() => { mounted = false })
-
-function getViewport(): HTMLElement | undefined {
-  return osRef.value?.osInstance()?.elements().viewport
-}
-
-async function scrollToBottom(smooth = false) {
-  await nextTick()
-  await nextTick()
-  if (scrollRafId !== null) cancelAnimationFrame(scrollRafId)
-  await new Promise<void>(resolve => {
-    scrollRafId = requestAnimationFrame(() => { scrollRafId = null; resolve() })
-  })
-  if (!mounted) return
-  const viewport = getViewport()
-  if (viewport) {
-    viewport.scrollTo({ top: viewport.scrollHeight, behavior: smooth ? 'smooth' : 'instant' })
-    showScrollButton.value = false
-  }
-}
-
-function onMessagesScroll() {
-  const viewport = getViewport()
-  if (!viewport) return
-  const distFromBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight
-  showScrollButton.value = distFromBottom > 100
-}
-
-let scrollViewport: HTMLElement | undefined
-
-watch(osReady, async (ready) => {
-  if (!ready) return
-  await nextTick()
-  if (scrollViewport) {
-    scrollViewport.removeEventListener('scroll', onMessagesScroll)
-    scrollViewport = undefined
-  }
-  const viewport = getViewport()
-  if (!viewport) return
-  scrollViewport = viewport
-  viewport.addEventListener('scroll', onMessagesScroll, { passive: true })
-})
-
-onUnmounted(() => {
-  scrollViewport?.removeEventListener('scroll', onMessagesScroll)
-  if (scrollRafId !== null) cancelAnimationFrame(scrollRafId)
-})
-
+const scrollAreaRef = useTemplateRef<InstanceType<typeof ChatScrollArea>>('scrollAreaRef')
 
 function scrollToMessage(id: string) {
   nextTick(() => {
@@ -286,15 +231,10 @@ function onSend(html: string) {
     replyTo: replyingTo.value ?? undefined,
   })
   replyingTo.value = null
-  scrollToBottom()
 }
 
-watch(() => messages.value.length, () => {
-  scrollToBottom()
-})
-
 watch(() => props.chatId, () => {
-  scrollToBottom()
+  scrollAreaRef.value?.reset()
 })
 </script>
 
@@ -331,36 +271,17 @@ watch(() => props.chatId, () => {
 
       <v-divider />
 
-      <div class="messages-wrapper flex-grow-1 position-relative">
-        <OverlayScrollbarsComponent
-          ref="osRef"
-          class="messages-area h-100 py-2"
-          :options="{ scrollbars: { autoHide: 'scroll', theme: 'os-theme-membrane' } }"
-          @os-initialized="osReady = true"
-        >
-          <div class="messages-content">
-            <ChatMessagesList
-              :messages="messages"
-              :should-show-header="shouldShowHeader"
-              @reply="onReply"
-              @scroll-to="scrollToMessage"
-              @vue:mounted="scrollToBottom"
-            />
-          </div>
-        </OverlayScrollbarsComponent>
-
-        <Transition name="scroll-btn">
-          <v-btn
-            v-if="showScrollButton"
-            icon="mdi-chevron-down"
-            class="scroll-to-bottom-btn"
-            size="small"
-            elevation="3"
-            color="surface-container-high"
-            @click="scrollToBottom(true)"
-          />
-        </Transition>
-      </div>
+      <ChatScrollArea
+        ref="scrollAreaRef"
+        class="flex-grow-1"
+      >
+        <ChatMessagesList
+          :messages="messages"
+          :should-show-header="shouldShowHeader"
+          @reply="onReply"
+          @scroll-to="scrollToMessage"
+        />
+      </ChatScrollArea>
 
       <MessageEditor
         :channel-name="channelName"
@@ -385,28 +306,6 @@ watch(() => props.chatId, () => {
     border-bottom: none;
   }
 
-  .messages-wrapper {
-    overflow: hidden;
-  }
-
-  .messages-area {
-    overflow: hidden;
-  }
-
-  .messages-content {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    min-height: 100%;
-  }
-
-  .scroll-to-bottom-btn {
-    position: absolute;
-    bottom: 12px;
-    right: 16px;
-    z-index: 10;
-  }
-
   .members-panel {
     inline-size: 240px;
     display: flex;
@@ -424,16 +323,5 @@ watch(() => props.chatId, () => {
       inline-size: 220px;
     }
   }
-}
-
-.scroll-btn-enter-active,
-.scroll-btn-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.scroll-btn-enter-from,
-.scroll-btn-leave-to {
-  opacity: 0;
-  transform: translateY(8px) scale(0.85);
 }
 </style>
