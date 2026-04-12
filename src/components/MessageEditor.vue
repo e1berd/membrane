@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, onBeforeUnmount } from 'vue'
-import { useEditor, EditorContent } from '@tiptap/vue-3'
-import StarterKit from '@tiptap/starter-kit'
+import { useEditor, EditorContent, type JSONContent } from '@tiptap/vue-3'
 import Placeholder from '@tiptap/extension-placeholder'
+import { tiptapMessageExtensions } from '@/lib/tiptapMessageExtensions'
 import type { ReplyInfo } from './MessageItem.vue'
 import EditorToolbar from './EditorToolbar.vue'
 
@@ -12,7 +12,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  send: [text: string]
+  send: [jsonContent: JSONContent]
   'cancel-reply': []
 }>()
 
@@ -33,15 +33,18 @@ const popularEmojis = [
   '📌', '💡', '⚡', '🐛', '🔧', '📝', '🗑️', '📎',
 ]
 
+function handleSend() {
+  if (!editor.value) return
+  const text = editor.value.getText().trim()
+  if (!text) return
+  emit('send', editor.value.getJSON())
+  editor.value.commands.clearContent()
+}
+
 const editor = useEditor({
   content: '',
   extensions: [
-    StarterKit.configure({
-      heading: false,
-      codeBlock: false,
-      horizontalRule: false,
-      blockquote: false,
-    }),
+    ...tiptapMessageExtensions,
     Placeholder.configure({
       placeholder: () => `Написать в #${props.channelName}...`,
     }),
@@ -50,17 +53,15 @@ const editor = useEditor({
     attributes: {
       class: 'editor-content',
     },
+    handleKeyDown(_view, event) {
+      if (event.key !== 'Enter' || event.shiftKey) return false
+      if (event.isComposing) return false
+      event.preventDefault()
+      handleSend()
+      return true
+    },
   },
 })
-
-
-function handleSend() {
-  if (!editor.value) return
-  const text = editor.value.getText().trim()
-  if (!text) return
-  emit('send', editor.value.getHTML())
-  editor.value.commands.clearContent()
-}
 
 function insertEmoji(emoji: string) {
   editor.value?.commands.insertContent(emoji)

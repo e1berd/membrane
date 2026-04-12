@@ -5,7 +5,7 @@ import { useCurrentProfile } from '@/composables/useCurrentProfile'
 import { supabase } from '@/lib/supabase'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/vue-query'
 import type { RealtimeChannel } from '@supabase/supabase-js'
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, ref, watch, onUnmounted } from 'vue'
 
 defineProps<{
   workspaceId?: string
@@ -25,12 +25,20 @@ const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage }
     const to = from + PAGE_SIZE - 1
     const { data, error } = await supabase
       .from('chats')
-      .select('*, chat_members!inner(user_id)')
+      .select(`
+        id,
+        created_at,
+        type,
+        chat_members (
+          user_id,
+          profiles ( id, username, avatar_url, profile_color )
+        )
+      `)
       .eq('type', 'direct')
-      .eq('chat_members.user_id', profileId.value!)
+      .order('created_at', { ascending: false })
       .range(from, to)
     if (error) throw error
-    return data
+    return data ?? []
   },
   initialPageParam: 0,
   getNextPageParam: (lastPage, allPages) =>
@@ -44,27 +52,36 @@ const queryClient = useQueryClient()
 
 let channel: RealtimeChannel | null = null
 
-onMounted(() => {
+function subscribeChatListRealtime(userId: string) {
+  if (channel) supabase.removeChannel(channel)
   channel = supabase
-    .channel('chats-inserts')
+    .channel(`chat-list-${userId}`)
     .on(
       'postgres_changes',
-      { event: 'INSERT', schema: 'public', table: 'chats' },
-      async (payload) => {
-        const { data } = await supabase
-          .from('chat_members')
-          .select('user_id')
-          .eq('chat_id', payload.new.id)
-          .eq('user_id', profile.value?.id ?? '')
-          .maybeSingle()
-
-        if (data) {
-          queryClient.invalidateQueries({ queryKey: ['chats'] })
-        }
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'chat_members',
+        filter: `user_id=eq.${userId}`,
+      },
+      () => {
+        queryClient.invalidateQueries({ queryKey: ['chats'] })
       },
     )
     .subscribe()
-})
+}
+
+watch(
+  profileId,
+  (id) => {
+    if (id) subscribeChatListRealtime(id)
+    else if (channel) {
+      supabase.removeChannel(channel)
+      channel = null
+    }
+  },
+  { immediate: true },
+)
 
 onUnmounted(() => {
   if (channel) supabase.removeChannel(channel)
@@ -129,6 +146,7 @@ onUnmounted(() => {
     <ChatList
       v-else
       :chats="chats"
+      :current-user-id="profileId ?? ''"
       :has-next-page="hasNextPage"
       :is-fetching-next-page="isFetchingNextPage"
       @load-more="fetchNextPage"

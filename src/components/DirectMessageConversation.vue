@@ -1,11 +1,17 @@
 <script setup lang="ts">
-import { ref, computed, nextTick, onMounted, watch, useTemplateRef, defineAsyncComponent, toRef } from 'vue'
+import { ref, computed, nextTick, onMounted, onUnmounted, watch, useTemplateRef, defineAsyncComponent, toRef } from 'vue'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
 import type { OverlayScrollbarsComponentRef } from 'overlayscrollbars-vue'
 import 'overlayscrollbars/overlayscrollbars.css'
 import type { ReplyInfo } from '@/components/MessageItem.vue'
 import { supabase } from '@/lib/supabase'
-import { useQuery } from '@tanstack/vue-query'
+import type { Json } from '@/lib/database.types'
+import { useCurrentProfile } from '@/composables/useCurrentProfile'
+import { useChatMessagesInfiniteQuery, type ChatMessage } from '@/composables/useChatMessagesInfiniteQuery'
+import { useQuery, useQueryClient } from '@tanstack/vue-query'
+import type { JSONContent } from '@tiptap/vue-3'
+import { useRouter } from '@kitbag/router'
+
 
 const ChatMessagesList = defineAsyncComponent(() => import('@/components/ChatMessagesList.vue'))
 const MessageEditor = defineAsyncComponent(() => import('@/components/MessageEditor.vue'))
@@ -16,6 +22,23 @@ const props = defineProps<{
 }>()
 
 const profileIdRef = toRef(() => props.profileId)
+const router = useRouter()
+const queryClient = useQueryClient()
+const { profile: currentUserProfile } = useCurrentProfile()
+
+const dmChatId = computed(() => {
+  const id = props.chatId
+  if (!id || id === 'new') return null
+  return id
+})
+
+const {
+  messages,
+  isLoading: messagesLoading,
+  fetchNextPage,
+  hasNextPage,
+  isFetchingNextPage,
+} = useChatMessagesInfiniteQuery(dmChatId)
 
 const { data: profile } = useQuery({
   queryKey: ['profile', profileIdRef],
@@ -37,18 +60,7 @@ const profileInitial = computed(() => {
   return profile.value.username.charAt(0).toUpperCase()
 })
 
-interface ChatMessage {
-  id: string
-  sender: string
-  avatar: string
-  text: string
-  time: string
-  color: string
-  replyTo?: ReplyInfo
-}
-
 const replyingTo = ref<ReplyInfo | null>(null)
-const messages = ref<ChatMessage[]>([])
 
 function onReply(msg: ChatMessage) {
   replyingTo.value = {
@@ -85,37 +97,95 @@ function scrollToMessage(id: string) {
 }
 
 function shouldShowHeader(index: number): boolean {
+  const list = messages.value
   if (index === 0) return true
-  const prev = messages.value[index - 1]
-  const curr = messages.value[index]
+  const prev = list[index - 1]
+  const curr = list[index]
   if (prev.sender !== curr.sender) return true
   const prevTime = new Date(prev.time).getTime()
   const currTime = new Date(curr.time).getTime()
   return currTime - prevTime > 5 * 60 * 1000
 }
 
-function onSend(html: string) {
-  messages.value.push({
-    id: String(Date.now()),
-    sender: 'Вы',
-    avatar: 'U',
-    text: html,
-    time: new Date().toISOString(),
-    color: 'primary',
-    replyTo: replyingTo.value ?? undefined,
-  })
-  replyingTo.value = null
-  scrollToBottom()
-
-  // TODO: when backend is ready, create chat and replace route from 'new' to actual chat UUID
+async function getChatId(): Promise<string> {
+  if (props.chatId === 'new') {
+    const { data: chatId, error } = await supabase.rpc('create_chat', {
+      chat_type: 'direct',
+      member_ids: [props.profileId],
+    })
+    if (error) throw error
+    await router.push(`/profile/${props.profileId}/direct/${chatId}`)
+    await queryClient.invalidateQueries({ queryKey: ['chats'] })
+    return chatId
+  }
+  return props.chatId
 }
+
+async function sendMessage(jsonContent: JSONContent) {
+  const sender = currentUserProfile.value
+  if (!sender) throw new Error('Нужна авторизация, чтобы отправить сообщение')
+
+  const chatId = await getChatId()
+  const { error } = await supabase.from('chat_messages').insert({
+    chat_id: chatId,
+    user_id: sender.id,
+    message_content: jsonContent as Json,
+    reply_to_chat_message_id: replyingTo.value?.id ?? null,
+  })
+  if (error) throw error
+  replyingTo.value = null
+  await queryClient.invalidateQueries({ queryKey: ['chatMessages', chatId] })
+  await nextTick()
+  scrollToBottom()
+}
+
+const initialScrollDoneForChat = ref<string | null>(null)
+
+watch(dmChatId, (id) => {
+  if (!id) initialScrollDoneForChat.value = null
+})
+
+watch(
+  () => [dmChatId.value, messagesLoading.value, messages.value.length] as const,
+  async ([cid, loading, n]) => {
+    if (!cid || loading || n === 0) return
+    if (initialScrollDoneForChat.value === cid) return
+    initialScrollDoneForChat.value = cid
+    await nextTick()
+    scrollToBottom()
+  },
+)
+
+function onMessagesScroll() {
+  const viewport = getViewport()
+  if (!viewport || isFetchingNextPage.value || !hasNextPage.value) return
+  if (viewport.scrollTop < 100) fetchNextPage()
+}
+
+let scrollViewport: HTMLElement | undefined
+
+watch(
+  () => [dmChatId.value, messagesLoading.value] as const,
+  async () => {
+    await nextTick()
+    if (scrollViewport) {
+      scrollViewport.removeEventListener('scroll', onMessagesScroll)
+      scrollViewport = undefined
+    }
+    const viewport = getViewport()
+    if (!viewport || isNewChat.value) return
+    scrollViewport = viewport
+    viewport.addEventListener('scroll', onMessagesScroll, { passive: true })
+  },
+  { immediate: true },
+)
 
 onMounted(() => {
   scrollToBottom()
 })
 
-watch(() => props.profileId, () => {
-  messages.value = []
+onUnmounted(() => {
+  scrollViewport?.removeEventListener('scroll', onMessagesScroll)
 })
 </script>
 
@@ -156,7 +226,7 @@ watch(() => props.profileId, () => {
       :options="{ scrollbars: { autoHide: 'scroll', theme: 'os-theme-membrane' } }"
       defer
     >
-      <template v-if="isNewChat && messages.length === 0">
+      <template v-if="isNewChat">
         <div class="new-chat-welcome d-flex flex-column align-center justify-center">
           <v-avatar
             size="64"
@@ -174,7 +244,16 @@ watch(() => props.profileId, () => {
         </div>
       </template>
 
+      <template v-else-if="!isNewChat && messagesLoading && messages.length === 0">
+        <div class="d-flex align-center justify-center py-16">
+          <v-progress-circular indeterminate color="primary" size="40" />
+        </div>
+      </template>
+
       <template v-else-if="messages.length > 0">
+        <div v-if="isFetchingNextPage" class="d-flex justify-center py-2">
+          <v-progress-circular indeterminate color="primary" size="24" />
+        </div>
         <ChatMessagesList
           :messages="messages"
           :should-show-header="shouldShowHeader"
@@ -182,12 +261,18 @@ watch(() => props.profileId, () => {
           @scroll-to="scrollToMessage"
         />
       </template>
+
+      <template v-else-if="!isNewChat">
+        <div class="d-flex flex-column align-center justify-center py-16 text-body-2 text-on-surface-variant">
+          Пока нет сообщений — напишите первым
+        </div>
+      </template>
     </OverlayScrollbarsComponent>
 
     <MessageEditor
       :channel-name="profile?.username ?? '...'"
       :reply-to="replyingTo"
-      @send="onSend"
+      @send="sendMessage"
       @cancel-reply="cancelReply"
     />
   </div>
