@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import ChatList from '@/components/ChatList.vue'
 import { useCurrentProfile } from '@/composables/useCurrentProfile'
 import { supabase } from '@/lib/supabase'
-import { useQuery, useQueryClient } from '@tanstack/vue-query'
+import { useInfiniteQuery, useQueryClient } from '@tanstack/vue-query'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 
@@ -13,25 +14,34 @@ const emit = defineEmits<{
   select: [channel: string]
 }>()
 
+const PAGE_SIZE = 20
+
 const search = ref('')
 const { profile } = useCurrentProfile()
 
 const profileId = computed(() => profile.value?.id)
 
-const { data: chats, isLoading, error } = useQuery({
+const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
   queryKey: ['chats', profileId],
-  queryFn: async () => {
+  queryFn: async ({ pageParam }) => {
+    const from = pageParam * PAGE_SIZE
+    const to = from + PAGE_SIZE - 1
     const { data, error } = await supabase
       .from('chats')
       .select('*, chat_members!inner(user_id)')
       .eq('type', 'direct')
       .eq('chat_members.user_id', profileId.value!)
-      .limit(128)
+      .range(from, to)
     if (error) throw error
     return data
   },
+  initialPageParam: 0,
+  getNextPageParam: (lastPage, allPages) =>
+    lastPage.length === PAGE_SIZE ? allPages.length : undefined,
   enabled: () => !!profileId.value,
 })
+
+const chats = computed(() => data.value?.pages.flat() ?? [])
 
 const queryClient = useQueryClient()
 
@@ -112,19 +122,25 @@ onUnmounted(() => {
       type="error"
       variant="tonal"
       class="ma-2"
-    >{{ (error as Error).message }}</v-alert>
+    >
+      {{ (error as Error).message }}
+    </v-alert>
 
     <div
-      v-if="!isLoading && !error && !chats?.length"
+      v-if="!isLoading && !error && !chats.length"
       class="d-flex align-center justify-center flex-grow-1"
       style="height: calc(100% - 124px)"
     >
       <span class="text-body-2 text-medium-emphasis">Нет диалогов</span>
     </div>
 
-    <v-list density="compact" nav class="px-2">
-
-    </v-list>
+    <ChatList
+      v-else
+      :chats="chats"
+      :has-next-page="hasNextPage"
+      :is-fetching-next-page="isFetchingNextPage"
+      @load-more="fetchNextPage"
+    />
 
   </v-navigation-drawer>
 </template>

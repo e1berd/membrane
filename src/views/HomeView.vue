@@ -76,12 +76,38 @@ import ChannelList from '@/components/ChannelList.vue'
                 class="action-card"
                 rounded="xl"
                 variant="tonal"
-                color="surface-variant"
+                color="info"
                 ripple
             >
                 <v-card-text class="action-card-content">
-                <v-icon icon="mdi-magnify" size="32" />
-                <span class="text-body-1 font-weight-medium mt-3">Найти людей</span>
+                <v-icon icon="mdi-account-group-outline" size="32" />
+                <span class="text-body-1 font-weight-medium mt-3">Создать группу</span>
+                </v-card-text>
+            </v-card>
+
+            <v-card
+                class="action-card"
+                rounded="xl"
+                variant="tonal"
+                color="success"
+                ripple
+            >
+                <v-card-text class="action-card-content">
+                <v-icon icon="mdi-microphone-plus" size="32" />
+                <span class="text-body-1 font-weight-medium mt-3">Создать голосовой чат</span>
+                </v-card-text>
+            </v-card>
+
+            <v-card
+                class="action-card"
+                rounded="xl"
+                variant="tonal"
+                color="warning"
+                ripple
+            >
+                <v-card-text class="action-card-content">
+                <v-icon icon="mdi-link-variant-plus" size="32" />
+                <span class="text-body-1 font-weight-medium mt-3">Присоединиться по ссылке</span>
                 </v-card-text>
             </v-card>
             </div>
