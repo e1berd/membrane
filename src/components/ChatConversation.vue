@@ -4,6 +4,7 @@ import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
 import type { OverlayScrollbarsComponentRef } from 'overlayscrollbars-vue'
 import 'overlayscrollbars/overlayscrollbars.css'
 import type { ReplyInfo } from '@/components/MessageItem.vue'
+import { useCurrentProfile } from '@/composables/useCurrentProfile'
 
 const MemberList = defineAsyncComponent(() => import('@/components/MemberList.vue'))
 const ChatMessagesList = defineAsyncComponent(() => import('@/components/ChatMessagesList.vue'))
@@ -39,14 +40,19 @@ const channelDescription = computed(() => {
 
 interface ChatMessage {
   id: string
+  userId?: string
   sender: string
   avatar: string
+  avatar_url?: string | null
+  overlay_url?: string | null
+  bio?: string | null
   text: string
   time: string
   color: string
   replyTo?: ReplyInfo
 }
 
+const { profile: currentProfile } = useCurrentProfile()
 const replyingTo = ref<ReplyInfo | null>(null)
 
 function onReply(msg: ChatMessage) {
@@ -225,13 +231,18 @@ function shouldShowHeader(index: number): boolean {
 }
 
 function onSend(html: string) {
+  const p = currentProfile.value
   messages.value.push({
     id: String(Date.now()),
-    sender: 'Вы',
-    avatar: 'U',
+    userId: p?.id,
+    sender: p?.username ?? 'Вы',
+    avatar: p ? p.username.charAt(0).toUpperCase() : 'U',
+    avatar_url: p?.avatar_url ?? null,
+    overlay_url: p?.overlay_url ?? null,
+    bio: p?.bio ?? null,
     text: html,
     time: new Date().toISOString(),
-    color: 'primary',
+    color: p?.profile_color ?? 'primary',
     replyTo: replyingTo.value ?? undefined,
   })
   replyingTo.value = null

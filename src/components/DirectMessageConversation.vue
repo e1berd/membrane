@@ -15,6 +15,7 @@ import { useRouter } from '@kitbag/router'
 
 const ChatMessagesList = defineAsyncComponent(() => import('@/components/ChatMessagesList.vue'))
 const MessageEditor = defineAsyncComponent(() => import('@/components/MessageEditor.vue'))
+const UserProfileDialog = defineAsyncComponent(() => import('@/components/UserProfileDialog.vue'))
 
 const props = defineProps<{
   profileId: string
@@ -193,23 +194,45 @@ onUnmounted(() => {
   <div
     class="dm-view d-flex flex-column"
     style="height: 100dvh"
+    :key="props.chatId + props.profileId"
   >
     <v-toolbar
       density="comfortable"
       color="surface"
       class="dm-header flex-shrink-0"
     >
-      <v-avatar
-        size="28"
-        :color="profile?.profile_color ?? 'primary'"
-        class="ml-4 mr-2"
+      <UserProfileDialog
+        v-if="profile"
+        :user="{
+          userId: profile.id,
+          name: profile.username,
+          avatar: profileInitial,
+          avatar_url: profile.avatar_url,
+          overlay_url: profile.overlay_url,
+          color: profile.profile_color ?? 'primary',
+          bio: profile.bio,
+        }"
       >
-        <v-img v-if="profile?.avatar_url" :src="profile.avatar_url" />
-        <span v-else class="text-caption font-weight-medium">{{ profileInitial }}</span>
+        <template #activator="{ props: profileProps }">
+          <div v-bind="profileProps" class="d-flex align-center ml-4 mr-2 cursor-pointer">
+            <v-avatar
+              size="28"
+              :color="profile.profile_color ?? 'primary'"
+              class="mr-2"
+            >
+              <v-img v-if="profile.avatar_url" :src="profile.avatar_url" />
+              <span v-else class="text-caption font-weight-medium">{{ profileInitial }}</span>
+            </v-avatar>
+            <span class="text-body-1 font-weight-bold">{{ profile.username }}</span>
+          </div>
+        </template>
+      </UserProfileDialog>
+      <v-avatar v-else size="28" color="primary" class="ml-4 mr-2">
+        <span class="text-caption font-weight-medium">?</span>
       </v-avatar>
 
-      <v-toolbar-title class="text-body-1 font-weight-bold">
-        {{ profile?.username ?? '...' }}
+      <v-toolbar-title v-if="!profile" class="text-body-1 font-weight-bold">
+        ...
       </v-toolbar-title>
 
       <v-spacer />
@@ -264,7 +287,7 @@ onUnmounted(() => {
 
       <template v-else-if="!isNewChat">
         <div class="d-flex flex-column align-center justify-center py-16 text-body-2 text-on-surface-variant">
-          Пока нет сообщений — напишите первым
+          Пока нет сообщений - напишите первым
         </div>
       </template>
     </OverlayScrollbarsComponent>
@@ -287,6 +310,10 @@ onUnmounted(() => {
 
   .messages-area {
     overflow: hidden;
+  }
+
+  .cursor-pointer {
+    cursor: pointer;
   }
 
   .new-chat-welcome {

@@ -11,8 +11,12 @@ export interface ReplyInfo {
 }
 
 const props = defineProps<{
+  userId?: string
   sender: string
   avatar: string
+  avatarUrl?: string | null
+  overlayUrl?: string | null
+  bio?: string | null
   text: string
   time: string
   color?: string
@@ -72,7 +76,7 @@ function copyMessageContent() {
     <div class="d-flex gap-3">
       <UserProfileDialog
         v-if="showHeader"
-        :user="{ name: sender, avatar, color: color || 'primary' }"
+        :user="{ userId, name: sender, avatar, avatar_url: avatarUrl, overlay_url: overlayUrl, bio, color: color || 'primary' }"
       >
         <template #activator="{ props: profileProps }">
           <v-avatar
@@ -81,7 +85,8 @@ function copyMessageContent() {
             :color="color || 'primary'"
             class="mt-1 avatar-slot clickable-avatar"
           >
-            <span class="text-body-2 font-weight-medium">{{ avatar }}</span>
+            <v-img v-if="avatarUrl" :src="avatarUrl" :alt="avatar" />
+            <span v-else class="text-body-2 font-weight-medium">{{ avatar }}</span>
           </v-avatar>
         </template>
       </UserProfileDialog>

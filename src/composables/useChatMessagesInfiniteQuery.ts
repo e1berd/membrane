@@ -8,8 +8,12 @@ const PAGE_SIZE = 40
 
 export interface ChatMessage {
   id: string
+  userId: string
   sender: string
   avatar: string
+  avatar_url?: string | null
+  overlay_url?: string | null
+  bio?: string | null
   text: string
   time: string
   color: string
@@ -20,6 +24,8 @@ type ProfileRow = {
   id: string
   username: string
   avatar_url: string | null
+  overlay_url: string | null
+  bio: string | null
   profile_color: string | null
 }
 
@@ -66,7 +72,7 @@ async function fetchChatMessagesPage(chatId: string, offset: number): Promise<Ch
 
   const { data: profiles, error: profErr } = await supabase
     .from('profiles')
-    .select('id, username, avatar_url, profile_color')
+    .select('id, username, avatar_url, overlay_url, profile_color, bio')
     .in('id', [...userIds])
 
   if (profErr) throw profErr
@@ -77,8 +83,12 @@ async function fetchChatMessagesPage(chatId: string, offset: number): Promise<Ch
     const username = p?.username ?? '…'
     return {
       id: row.id,
+      userId: row.user_id,
       sender: username,
       avatar: p ? profileInitial(p) : '?',
+      avatar_url: p?.avatar_url ?? null,
+      overlay_url: p?.overlay_url ?? null,
+      bio: p?.bio ?? null,
       text: messageContentToHtml(row.message_content),
       time: row.created_at ?? new Date().toISOString(),
       color: p?.profile_color ?? 'primary',

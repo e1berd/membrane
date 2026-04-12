@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import MessageItem from '@/components/MessageItem.vue'
 import type { ReplyInfo } from '@/components/MessageItem.vue'
-import { vAutoAnimate } from '@formkit/auto-animate/vue'
+import { onBeforeMount, ref, useTemplateRef } from 'vue'
 
 interface ChatMessage {
   id: string
+  userId: string
   sender: string
   avatar: string
+  avatar_url?: string | null
+  overlay_url?: string | null
+  bio?: string | null
   text: string
   time: string
   color: string
@@ -22,6 +26,13 @@ const emit = defineEmits<{
   reply: [msg: ChatMessage]
   scrollTo: [id: string]
 }>()
+
+
+const canAnimate = ref(false)
+
+onBeforeMount(() => {
+  canAnimate.value = true
+})
 </script>
 
 <template>
@@ -33,13 +44,21 @@ const emit = defineEmits<{
     <v-divider />
   </div>
 
-  <ul v-auto-animate>
+  <TransitionGroup
+    mode="out-in"
+    tag="ul"
+    :name="canAnimate ? 'message' : undefined"
+  >
     <MessageItem
       v-for="(msg, index) in messages"
       :id="`msg-${msg.id}`"
       :key="msg.id"
+      :user-id="msg.userId"
       :sender="msg.sender"
       :avatar="msg.avatar"
+      :avatar-url="msg.avatar_url"
+      :overlay-url="msg.overlay_url"
+      :bio="msg.bio"
       :text="msg.text"
       :time="msg.time"
       :color="msg.color"
@@ -48,5 +67,20 @@ const emit = defineEmits<{
       @reply="emit('reply', msg)"
       @scroll-to="emit('scrollTo', $event)"
     />
-  </ul>
+  </TransitionGroup>
 </template>
+
+<style scoped>
+.message-enter-active {
+  interpolate-size: allow-keywords;
+  overflow: hidden;
+}
+
+.message-enter-from {
+  opacity: 0;
+}
+
+.message-enter-to {
+  opacity: 1;
+}
+</style>
