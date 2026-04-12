@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import MessageItem from '@/components/MessageItem.vue'
 import type { ReplyInfo } from '@/components/MessageItem.vue'
-import { onBeforeMount, ref, useTemplateRef } from 'vue'
+import { onBeforeMount, ref } from 'vue'
 
 interface ChatMessage {
   id: string

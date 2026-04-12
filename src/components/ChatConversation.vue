@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, nextTick, onMounted, watch, useTemplateRef, defineAsyncComponent } from 'vue'
+import { ref, computed, nextTick, watch, useTemplateRef, defineAsyncComponent } from 'vue'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
 import type { OverlayScrollbarsComponentRef } from 'overlayscrollbars-vue'
 import 'overlayscrollbars/overlayscrollbars.css'
@@ -199,19 +199,15 @@ const messages = ref<ChatMessage[]>([
 ])
 
 const osRef = useTemplateRef<OverlayScrollbarsComponentRef>('osRef')
+const osReady = ref(false)
 
-function getViewport(): HTMLElement | undefined {
-  return osRef.value?.osInstance()?.elements().viewport
+async function scrollToBottom() {
+  await nextTick()
+  await nextTick()
+  const viewport = osRef.value?.osInstance()?.elements().viewport
+  if (viewport) viewport.scrollTop = viewport.scrollHeight
 }
 
-function scrollToBottom() {
-  nextTick(() => {
-    const viewport = getViewport()
-    if (viewport) {
-      viewport.scrollTop = viewport.scrollHeight
-    }
-  })
-}
 
 function scrollToMessage(id: string) {
   nextTick(() => {
@@ -249,7 +245,7 @@ function onSend(html: string) {
   scrollToBottom()
 }
 
-onMounted(() => {
+watch(() => messages.value.length, () => {
   scrollToBottom()
 })
 
@@ -295,13 +291,14 @@ watch(() => props.chatId, () => {
         ref="osRef"
         class="messages-area flex-grow-1 py-2"
         :options="{ scrollbars: { autoHide: 'scroll', theme: 'os-theme-membrane' } }"
-        defer
+        @os-initialized="osReady = true"
       >
         <ChatMessagesList
           :messages="messages"
           :should-show-header="shouldShowHeader"
           @reply="onReply"
           @scroll-to="scrollToMessage"
+          @vue:mounted="scrollToBottom"
         />
       </OverlayScrollbarsComponent>
 

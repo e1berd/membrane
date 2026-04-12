@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, nextTick, onMounted, onUnmounted, watch, useTemplateRef, defineAsyncComponent, toRef } from 'vue'
+import { ref, computed, nextTick, onUnmounted, watch, useTemplateRef, defineAsyncComponent, toRef } from 'vue'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
 import type { OverlayScrollbarsComponentRef } from 'overlayscrollbars-vue'
 import 'overlayscrollbars/overlayscrollbars.css'
@@ -76,18 +76,17 @@ function cancelReply() {
 }
 
 const osRef = useTemplateRef<OverlayScrollbarsComponentRef>('osRef')
+const osReady = ref(false)
 
 function getViewport(): HTMLElement | undefined {
   return osRef.value?.osInstance()?.elements().viewport
 }
 
-function scrollToBottom() {
-  nextTick(() => {
-    const viewport = getViewport()
-    if (viewport) {
-      viewport.scrollTop = viewport.scrollHeight
-    }
-  })
+async function scrollToBottom() {
+  await nextTick()
+  await nextTick()
+  const viewport = osRef.value?.osInstance()?.elements().viewport
+  if (viewport) viewport.scrollTop = viewport.scrollHeight
 }
 
 function scrollToMessage(id: string) {
@@ -147,14 +146,14 @@ watch(dmChatId, (id) => {
 })
 
 watch(
-  () => [dmChatId.value, messagesLoading.value, messages.value.length] as const,
-  async ([cid, loading, n]) => {
-    if (!cid || loading || n === 0) return
+  () => [dmChatId.value, messagesLoading.value, messages.value.length, osReady.value] as const,
+  ([cid, loading, n, ready]) => {
+    if (!cid || loading || n === 0 || !ready) return
     if (initialScrollDoneForChat.value === cid) return
     initialScrollDoneForChat.value = cid
-    await nextTick()
     scrollToBottom()
   },
+  { flush: 'post' },
 )
 
 function onMessagesScroll() {
@@ -180,10 +179,6 @@ watch(
   },
   { immediate: true },
 )
-
-onMounted(() => {
-  scrollToBottom()
-})
 
 onUnmounted(() => {
   scrollViewport?.removeEventListener('scroll', onMessagesScroll)
@@ -247,7 +242,7 @@ onUnmounted(() => {
       ref="osRef"
       class="messages-area flex-grow-1 py-2"
       :options="{ scrollbars: { autoHide: 'scroll', theme: 'os-theme-membrane' } }"
-      defer
+      @os-initialized="osReady = true"
     >
       <template v-if="isNewChat">
         <div class="new-chat-welcome d-flex flex-column align-center justify-center">
@@ -282,6 +277,7 @@ onUnmounted(() => {
           :should-show-header="shouldShowHeader"
           @reply="onReply"
           @scroll-to="scrollToMessage"
+          @vue:mounted="scrollToBottom"
         />
       </template>
 
