@@ -1,5 +1,8 @@
-const THEME_PREFERENCE_KEY = 'membrane.theme.preference'
-const ACCENT_PREFERENCE_KEY = 'membrane.theme.accent'
+/** Single source of truth for localStorage keys (also inlined into index.html at build time). */
+export const THEME_LOCAL_STORAGE_KEYS = {
+  preference: 'membrane.theme.preference',
+  accent: 'membrane.theme.accent',
+} as const
 
 export type ThemePreference = 'system' | 'light' | 'dark'
 export type AccentColor = 'red' | 'rose' | 'orange' | 'amber' | 'green' | 'teal' | 'blue' | 'indigo' | 'purple'
@@ -625,6 +628,18 @@ const ACCENT_PALETTES: Record<AccentColor, AccentPalette> = {
   },
 }
 
+/** Light/dark surface colors per accent — used for first paint before the bundle runs. */
+export const ACCENT_BOOT_BACKGROUNDS: Record<AccentColor, { light: string; dark: string }> = (
+  Object.keys(ACCENT_PALETTES) as AccentColor[]
+).reduce(
+  (acc, key) => {
+    const p = ACCENT_PALETTES[key]
+    acc[key] = { light: p.light.background, dark: p.dark.background }
+    return acc
+  },
+  {} as Record<AccentColor, { light: string; dark: string }>,
+)
+
 function isThemePreference(value: string | null): value is ThemePreference {
   return value === 'system' || value === 'light' || value === 'dark'
 }
@@ -652,22 +667,22 @@ function applyTheme(theme: ThemeController, preference: ThemePreference): void {
 }
 
 export function getThemePreference(): ThemePreference {
-  const storedValue = window.localStorage.getItem(THEME_PREFERENCE_KEY)
+  const storedValue = window.localStorage.getItem(THEME_LOCAL_STORAGE_KEYS.preference)
   return isThemePreference(storedValue) ? storedValue : 'dark'
 }
 
 export function setThemePreference(theme: ThemeController, preference: ThemePreference): void {
-  window.localStorage.setItem(THEME_PREFERENCE_KEY, preference)
+  window.localStorage.setItem(THEME_LOCAL_STORAGE_KEYS.preference, preference)
   applyTheme(theme, preference)
 }
 
 export function getAccentPreference(): AccentColor {
-  const storedValue = window.localStorage.getItem(ACCENT_PREFERENCE_KEY)
+  const storedValue = window.localStorage.getItem(THEME_LOCAL_STORAGE_KEYS.accent)
   return isAccentColor(storedValue) ? storedValue : 'purple'
 }
 
 export function setAccentPreference(theme: ThemeController, accent: AccentColor): void {
-  window.localStorage.setItem(ACCENT_PREFERENCE_KEY, accent)
+  window.localStorage.setItem(THEME_LOCAL_STORAGE_KEYS.accent, accent)
   applyAccentColors(theme, accent)
 }
 

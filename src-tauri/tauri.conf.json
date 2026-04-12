@@ -16,7 +16,8 @@
         "title": "Membrane",
         "width": 1000,
         "height": 700,
-        "visible": false
+        "visible": false,
+        "backgroundColor": "#111318"
       }
     ],
     "security": {

@@ -33,10 +33,6 @@ onUnmounted(() => {
 </template>
 
 <style>
-:root {
-  color-scheme: light dark;
-}
-
 ::selection {
   background-color: color-mix(in srgb, rgb(var(--v-theme-selection-bg)) 100%, transparent);
   color: rgb(var(--v-theme-selection-text));
