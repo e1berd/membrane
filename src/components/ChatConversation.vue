@@ -47,6 +47,7 @@ interface ChatMessage {
   text: string
   time: string
   color: string
+  is_read: boolean | null
   replyTo?: ReplyInfo
 }
 
@@ -73,6 +74,7 @@ const messages = ref<ChatMessage[]>([
     text: 'Привет всем! Как дела с новым релизом?',
     time: '2026-04-10T09:30:00',
     color: 'primary',
+    is_read: true,
   },
   {
     id: '2',
@@ -89,6 +91,7 @@ const messages = ref<ChatMessage[]>([
     text: 'Отлично! Я как раз тестирую новый дизайн. Скоро покажу макеты.',
     time: '2026-04-10T09:32:00',
     color: 'tertiary',
+    is_read: true,
   },
   {
     id: '4',
@@ -97,6 +100,7 @@ const messages = ref<ChatMessage[]>([
     text: 'Кто-нибудь смотрел тикет #342? Там баг с уведомлениями на мобильных устройствах.',
     time: '2026-04-10T09:35:00',
     color: 'secondary',
+    is_read: true,
   },
   {
     id: '5',
@@ -105,6 +109,7 @@ const messages = ref<ChatMessage[]>([
     text: 'Да, я взяла его в работу. Проблема в WebSocket-соединении — оно не переподключается после выхода из спящего режима.',
     time: '2026-04-10T09:37:00',
     color: 'error',
+    is_read: true,
   },
   {
     id: '6',
