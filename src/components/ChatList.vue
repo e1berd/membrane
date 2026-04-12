@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import ChatSidebarItem from '@/components/ChatSidebarItem.vue'
+import { vAutoAnimate } from '@formkit/auto-animate/vue'
 
 export type DirectChatRow = {
   id: string
@@ -75,13 +76,21 @@ const rows = computed((): { chat: DirectChatRow; peer: PeerProfile }[] => {
 </script>
 
 <template>
-  <v-list density="compact" nav class="px-2">
-    <ChatSidebarItem
-      v-for="{ chat, peer } in rows"
-      :key="chat.id"
-      :chat-id="chat.id"
-      :peer="peer"
-    />
+  <div>
+    <v-list
+      density="compact"
+      nav
+      class="px-2"
+      v-auto-animate
+    >
+      <ChatSidebarItem
+        v-for="{ chat, peer } in rows"
+        :key="chat.id"
+        :chat-id="chat.id"
+        :peer="peer"
+      />
+
+    </v-list>
 
     <div
       v-if="hasNextPage"
@@ -93,7 +102,7 @@ const rows = computed((): { chat: DirectChatRow; peer: PeerProfile }[] => {
     <div v-if="isFetchingNextPage" class="d-flex justify-center pa-2">
       <v-progress-circular indeterminate size="20" />
     </div>
-  </v-list>
+  </div>
 </template>
 
 <style scoped>
