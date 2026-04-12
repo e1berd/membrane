@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useEditor, EditorContent, type JSONContent } from '@tiptap/vue-3'
 import Placeholder from '@tiptap/extension-placeholder'
 import { tiptapMessageExtensions } from '@/lib/tiptapMessageExtensions'
@@ -9,6 +9,7 @@ import EditorToolbar from './EditorToolbar.vue'
 const props = defineProps<{
   channelName: string
   replyTo?: ReplyInfo | null
+  autofocus?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -68,6 +69,12 @@ function insertEmoji(emoji: string) {
   showEmojiPicker.value = false
   editor.value?.commands.focus()
 }
+
+onMounted(() => {
+  if (props.autofocus) {
+    editor.value?.commands.focus()
+  }
+})
 
 onBeforeUnmount(() => {
   editor.value?.destroy()

@@ -1,9 +1,9 @@
 import StarterKit from '@tiptap/starter-kit'
-import Underline from '@tiptap/extension-underline'
 
 /**
- * Same document schema as {@link MessageEditor}: StarterKit (subset) + underline from the toolbar.
- * Used by {@link generateHTML} so stored JSON renders identically to the editor.
+ * Схема документа как в {@link MessageEditor}.
+ * Подчёркивание идёт из StarterKit v3 (встроенный Underline), отдельно не подключаем.
+ * Используется редактором и {@link generateHTML} в `messageContentToHtml`.
  */
 export const tiptapMessageExtensions = [
   StarterKit.configure({
@@ -12,5 +12,4 @@ export const tiptapMessageExtensions = [
     horizontalRule: false,
     blockquote: false,
   }),
-  Underline,
 ]

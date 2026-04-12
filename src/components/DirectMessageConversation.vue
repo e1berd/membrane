@@ -274,6 +274,7 @@ onUnmounted(() => {
       :reply-to="replyingTo"
       @send="sendMessage"
       @cancel-reply="cancelReply"
+      autofocus
     />
   </div>
 </template>

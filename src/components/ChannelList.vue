@@ -50,12 +50,28 @@ const chats = computed(() => data.value?.pages.flat() ?? [])
 
 const queryClient = useQueryClient()
 
+/** Уникален для каждого экземпляра ChannelList: иначе supabase.channel() переиспользует топик и второй .on() падает после subscribe(). */
+const realtimeScope = `${Math.random().toString(36).slice(2, 11)}`
+
 let channel: RealtimeChannel | null = null
+let subscribedUserId: string | null = null
+
+function teardownRealtime() {
+  if (channel) {
+    supabase.removeChannel(channel)
+    channel = null
+  }
+  subscribedUserId = null
+}
 
 function subscribeChatListRealtime(userId: string) {
-  if (channel) supabase.removeChannel(channel)
+  if (subscribedUserId === userId && channel) return
+
+  teardownRealtime()
+  subscribedUserId = userId
+
   channel = supabase
-    .channel(`chat-list-${userId}`)
+    .channel(`chat-list:${userId}:${realtimeScope}`)
     .on(
       'postgres_changes',
       {
@@ -75,17 +91,12 @@ watch(
   profileId,
   (id) => {
     if (id) subscribeChatListRealtime(id)
-    else if (channel) {
-      supabase.removeChannel(channel)
-      channel = null
-    }
+    else teardownRealtime()
   },
   { immediate: true },
 )
 
-onUnmounted(() => {
-  if (channel) supabase.removeChannel(channel)
-})
+onUnmounted(teardownRealtime)
 
 </script>
 

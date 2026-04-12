@@ -58,7 +58,7 @@ function copyMessageContent() {
 </script>
 
 <template>
-  <div
+  <li
     class="message-item px-4 py-1"
     :class="{ 'pt-3': showHeader }"
     @contextmenu="onContextMenu"
@@ -126,7 +126,7 @@ function copyMessageContent() {
         </v-list>
       </v-card>
     </v-menu>
-  </div>
+  </li>
 </template>
 
 <style scoped>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import MessageItem from '@/components/MessageItem.vue'
 import type { ReplyInfo } from '@/components/MessageItem.vue'
+import { vAutoAnimate } from '@formkit/auto-animate/vue'
 
 interface ChatMessage {
   id: string
@@ -24,7 +25,6 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <!-- Date Divider -->
   <div class="d-flex align-center px-4 my-3">
     <v-divider />
     <v-chip size="small" variant="outlined" color="outline" class="mx-3 flex-shrink-0">
@@ -33,18 +33,20 @@ const emit = defineEmits<{
     <v-divider />
   </div>
 
-  <MessageItem
-    v-for="(msg, index) in messages"
-    :id="`msg-${msg.id}`"
-    :key="msg.id"
-    :sender="msg.sender"
-    :avatar="msg.avatar"
-    :text="msg.text"
-    :time="msg.time"
-    :color="msg.color"
-    :show-header="shouldShowHeader(index)"
-    :reply-to="msg.replyTo"
-    @reply="emit('reply', msg)"
-    @scroll-to="emit('scrollTo', $event)"
-  />
+  <ul v-auto-animate>
+    <MessageItem
+      v-for="(msg, index) in messages"
+      :id="`msg-${msg.id}`"
+      :key="msg.id"
+      :sender="msg.sender"
+      :avatar="msg.avatar"
+      :text="msg.text"
+      :time="msg.time"
+      :color="msg.color"
+      :show-header="shouldShowHeader(index)"
+      :reply-to="msg.replyTo"
+      @reply="emit('reply', msg)"
+      @scroll-to="emit('scrollTo', $event)"
+    />
+  </ul>
 </template>

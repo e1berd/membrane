@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, useTemplateRef, watch } from 'vue'
 import ChatSidebarItem from '@/components/ChatSidebarItem.vue'
 import { vAutoAnimate } from '@formkit/auto-animate/vue'
 
@@ -29,7 +29,7 @@ const emit = defineEmits<{
   loadMore: []
 }>()
 
-const sentinel = ref<HTMLElement | null>(null)
+const sentinel = useTemplateRef('sentinel')
 let observer: IntersectionObserver | null = null
 
 async function setupObserver() {
