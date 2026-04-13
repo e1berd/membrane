@@ -8,6 +8,7 @@ import { useChatMessagesInfiniteQuery, type ChatMessage } from '@/composables/us
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import type { JSONContent } from '@tiptap/vue-3'
 import { useRouter } from '@kitbag/router'
+import { differenceInMinutes } from 'date-fns'
 
 const ChatScrollArea = defineAsyncComponent(() => import('@/components/ChatScrollArea.vue'))
 const ChatMessagesList = defineAsyncComponent(() => import('@/components/ChatMessagesList.vue'))
@@ -87,9 +88,10 @@ function shouldShowHeader(index: number): boolean {
   const prev = list[index - 1]
   const curr = list[index]
   if (prev.sender !== curr.sender) return true
-  const prevTime = new Date(prev.time).getTime()
-  const currTime = new Date(curr.time).getTime()
-  return currTime - prevTime > 5 * 60 * 1000
+  return differenceInMinutes(
+    new Date(curr.time),
+    new Date(prev.time),
+  ) > 5
 }
 
 async function getChatId(): Promise<string> {
