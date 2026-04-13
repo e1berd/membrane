@@ -89,6 +89,7 @@ const accentKeys = Object.keys(ACCENT_DISPLAY) as AccentColor[]
   cursor: pointer;
   padding: 0;
   transition: transform 0.12s ease, border-color 0.12s ease;
+  will-change: transform;
   outline: none;
 
   &:hover {

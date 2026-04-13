@@ -165,6 +165,7 @@ import ChannelList from '@/components/ChannelList.vue'
   .action-card {
     cursor: pointer;
     transition: transform 0.15s ease;
+    will-change: transform;
 
     &:hover { transform: translateY(-2px); }
   }
