@@ -65,9 +65,9 @@ watch(dialog, (val) => {
           size="16"
           color="on-surface-variant"
         />
-        <span class="text-caption font-weight-medium text-on-surface-variant"
-          >Новое сообщение</span
-        >
+        <span class="text-caption font-weight-medium text-on-surface-variant">
+          Новое сообщение
+        </span>
         <v-spacer />
         <v-btn
           icon="mdi-close"
@@ -108,6 +108,7 @@ watch(dialog, (val) => {
                   v-for="profile in results"
                   :key="profile.id"
                   :profile="profile"
+                  @select="dialog = false"
                 />
 
                 <NewMessageSearchEmptyState

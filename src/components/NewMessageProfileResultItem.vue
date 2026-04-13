@@ -1,16 +1,49 @@
 <script setup lang="ts">
 import type { Tables } from '@/lib/database.types'
-import { useLink } from '@kitbag/router'
+import { supabase } from '@/lib/supabase'
+import { useLink, useRouter } from '@kitbag/router'
+import { onMounted, ref } from 'vue'
 
 const props = defineProps<{
   profile: Tables<'profiles'>
+}>()
+
+const emit = defineEmits<{
+  select: []
 }>()
 
 function getInitial(username: string) {
   return username.charAt(0).toUpperCase()
 }
 
-const { href, push } = useLink('direct', { directId: 'new', profileId: props.profile.id })
+const chatId = ref<Tables<'chats'>['id']>()
+const router = useRouter()
+const newDirectLink = useLink('direct', { directId: 'new', profileId: props.profile.id })
+
+
+function getDirect() {
+  return supabase
+    .from('chats')
+    .select('id, chat_members!inner(user_id)')
+    .eq('type', 'direct')
+    .eq('chat_members.user_id', props.profile.id)
+    .maybeSingle()
+}
+
+async function gotoDirect() {
+  if (chatId.value) {
+    await router.push('direct', { directId: chatId.value, profileId: props.profile.id })
+  } else {
+    await newDirectLink.push()
+  }
+  emit('select')
+}
+
+onMounted(async () => {
+  const { data: chat } = await getDirect()
+  chatId.value = chat?.id
+})
+
 </script>
 
 <template>
@@ -18,9 +51,8 @@ const { href, push } = useLink('direct', { directId: 'new', profileId: props.pro
     rounded="lg"
     class="result-item"
     min-height="56"
-    :to="href"
-    @click.prevent="push()"
-    @keydown.enter.prevent="push()"
+    @click.prevent="gotoDirect()"
+    @keydown.enter.prevent="gotoDirect()"
   >
     <template #prepend>
       <v-avatar
