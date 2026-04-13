@@ -4,7 +4,7 @@ import type { ReplyInfo } from '@/components/MessageItem.vue'
 import { supabase } from '@/lib/supabase'
 import type { Json } from '@/lib/database.types'
 import { useCurrentProfile } from '@/composables/useCurrentProfile'
-import { useChatMessagesInfiniteQuery, type ChatMessage } from '@/composables/useChatMessagesInfiniteQuery'
+import { useDirectMessageInfiniteQuery, type ChatMessage } from '@/composables/useDirectMessageInfiniteQuery'
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import type { JSONContent } from '@tiptap/vue-3'
 import { useRouter } from '@kitbag/router'
@@ -37,7 +37,7 @@ const {
   fetchNextPage,
   hasNextPage,
   isFetchingNextPage,
-} = useChatMessagesInfiniteQuery(dmChatId)
+} = useDirectMessageInfiniteQuery(dmChatId)
 
 const { data: profile } = useQuery({
   queryKey: ['profile', profileIdRef],

@@ -106,7 +106,7 @@ async function fetchChatMessagesPage(chatId: string, offset: number): Promise<Ch
 /**
  * Loads chat messages from Supabase, newest page first; `messages` is chronological (oldest → newest).
  */
-export function useChatMessagesInfiniteQuery(chatId: MaybeRefOrGetter<string | null | undefined>) {
+export function useDirectMessageInfiniteQuery(chatId: MaybeRefOrGetter<string | null | undefined>) {
   const chatIdComputed = computed(() => {
     const id = toValue(chatId)
     if (id == null || id === '' || id === 'new') return null
