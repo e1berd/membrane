@@ -61,7 +61,7 @@ const profileInitial = computed(() => {
 
 const replyingTo = ref<ReplyInfo | null>(null)
 
-function onReply(msg: ChatMessage) {
+function replyMessage(msg: ChatMessage) {
   replyingTo.value = {
     id: msg.id,
     sender: msg.sender,
@@ -222,7 +222,7 @@ watch(dmChatId, () => {
         <ChatMessagesList
           :messages="messages"
           :should-show-header="shouldShowHeader"
-          @reply="onReply"
+          @reply="replyMessage"
           @scroll-to="scrollToMessage"
         />
       </template>
