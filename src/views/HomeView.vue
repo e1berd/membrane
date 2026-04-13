@@ -11,9 +11,7 @@ import SettingsDialog from '@/components/SettingsDialog.vue'
       <div class="home-header">
         <v-icon icon="mdi-alpha-m-box" size="48" color="primary" class="mb-2" />
         <h1 class="text-h4 font-weight-bold">Membrane</h1>
-        <p class="text-body-1 text-medium-emphasis mt-1">
-          Ваше пространство для общения
-        </p>
+        <p class="text-body-1 text-medium-emphasis mt-1">Ваше пространство для общения</p>
       </div>
 
       <OverlayScrollbarsComponent
@@ -21,106 +19,55 @@ import SettingsDialog from '@/components/SettingsDialog.vue'
         :options="{
           scrollbars: { autoHide: 'scroll', theme: 'os-theme-membrane' },
         }"
-        defer
-      >
+        defer>
         <div class="actions-grid">
           <NewMessageDialog>
             <template #activator="{ props }">
-              <v-card
-                v-bind="props"
-                class="action-card"
-                rounded="xl"
-                variant="tonal"
-                color="primary"
-                ripple
-              >
+              <v-card v-bind="props" class="action-card" rounded="xl" variant="tonal" color="primary" ripple>
                 <v-card-text class="action-card-content">
                   <v-icon icon="mdi-message-plus-outline" size="32" />
-                  <span class="text-body-1 font-weight-medium mt-3"
-                    >Написать сообщение</span
-                  >
+                  <span class="text-body-1 font-weight-medium mt-3">Написать сообщение</span>
                 </v-card-text>
               </v-card>
             </template>
           </NewMessageDialog>
 
-          <v-card
-            class="action-card"
-            rounded="xl"
-            variant="tonal"
-            color="secondary"
-            ripple
-          >
+          <v-card class="action-card" rounded="xl" variant="tonal" color="secondary" ripple>
             <v-card-text class="action-card-content">
               <v-icon icon="mdi-layers-plus" size="32" />
-              <span class="text-body-1 font-weight-medium mt-3"
-                >Создать пространство</span
-              >
+              <span class="text-body-1 font-weight-medium mt-3">Создать пространство</span>
             </v-card-text>
           </v-card>
 
           <SettingsDialog>
             <template #activator="{ props }">
-              <v-card
-                v-bind="props"
-                class="action-card"
-                rounded="xl"
-                variant="tonal"
-                color="tertiary"
-                ripple
-              >
+              <v-card v-bind="props" class="action-card" rounded="xl" variant="tonal" color="tertiary" ripple>
                 <v-card-text class="action-card-content">
                   <v-icon icon="mdi-cog-outline" size="32" />
-                  <span class="text-body-1 font-weight-medium mt-3"
-                    >Настройки</span
-                  >
+                  <span class="text-body-1 font-weight-medium mt-3">Настройки</span>
                 </v-card-text>
               </v-card>
             </template>
           </SettingsDialog>
 
-          <v-card
-            class="action-card"
-            rounded="xl"
-            variant="tonal"
-            color="info"
-            ripple
-          >
+          <v-card class="action-card" rounded="xl" variant="tonal" color="info" ripple>
             <v-card-text class="action-card-content">
               <v-icon icon="mdi-account-group-outline" size="32" />
-              <span class="text-body-1 font-weight-medium mt-3"
-                >Создать группу</span
-              >
+              <span class="text-body-1 font-weight-medium mt-3">Создать группу</span>
             </v-card-text>
           </v-card>
 
-          <v-card
-            class="action-card"
-            rounded="xl"
-            variant="tonal"
-            color="success"
-            ripple
-          >
+          <v-card class="action-card" rounded="xl" variant="tonal" color="success" ripple>
             <v-card-text class="action-card-content">
               <v-icon icon="mdi-microphone-plus" size="32" />
-              <span class="text-body-1 font-weight-medium mt-3"
-                >Создать голосовой чат</span
-              >
+              <span class="text-body-1 font-weight-medium mt-3">Создать голосовой чат</span>
             </v-card-text>
           </v-card>
 
-          <v-card
-            class="action-card"
-            rounded="xl"
-            variant="tonal"
-            color="warning"
-            ripple
-          >
+          <v-card class="action-card" rounded="xl" variant="tonal" color="warning" ripple>
             <v-card-text class="action-card-content">
               <v-icon icon="mdi-link-variant-plus" size="32" />
-              <span class="text-body-1 font-weight-medium mt-3"
-                >Присоединиться по ссылке</span
-              >
+              <span class="text-body-1 font-weight-medium mt-3">Присоединиться по ссылке</span>
             </v-card-text>
           </v-card>
         </div>
