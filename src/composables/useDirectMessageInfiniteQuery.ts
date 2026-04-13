@@ -1,5 +1,6 @@
-import { computed, type MaybeRefOrGetter, toValue } from 'vue'
-import { useInfiniteQuery } from '@tanstack/vue-query'
+import { computed, watch, type MaybeRefOrGetter, toValue } from 'vue'
+import { useInfiniteQuery, useQueryClient, type InfiniteData } from '@tanstack/vue-query'
+import type { RealtimeChannel } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { messageContentToHtml } from '@/lib/messageContentToHtml'
 import type { ReplyInfo } from '@/types'
@@ -7,8 +8,7 @@ import type { Tables } from '@/lib/database.types'
 
 const PAGE_SIZE = 40
 
-export type ChatMessage =
-  Pick<Tables<'chat_messages'>, 'id' | 'is_read'> &
+export type ChatMessage = Pick<Tables<'chat_messages'>, 'id' | 'is_read'> &
   Pick<Tables<'profiles'>, 'avatar_url' | 'overlay_url' | 'bio'> & {
     userId: string
     sender: string
@@ -21,7 +21,10 @@ export type ChatMessage =
 
 type ProfileRow = Pick<Tables<'profiles'>, 'id' | 'username' | 'avatar_url' | 'overlay_url' | 'bio' | 'profile_color'>
 
-type MessageRow = Pick<Tables<'chat_messages'>, 'id' | 'user_id' | 'created_at' | 'reply_to_chat_message_id' | 'is_read'> & {
+type MessageRow = Pick<
+  Tables<'chat_messages'>,
+  'id' | 'user_id' | 'created_at' | 'reply_to_chat_message_id' | 'is_read'
+> & {
   message_content: unknown
 }
 
@@ -103,6 +106,66 @@ async function fetchChatMessagesPage(chatId: string, offset: number): Promise<Ch
   })
 }
 
+async function fetchMessageById(messageId: string): Promise<ChatMessage | null> {
+  const { data: rows, error } = await supabase
+    .from('chat_messages')
+    .select('id, user_id, message_content, is_read, created_at, reply_to_chat_message_id')
+    .eq('id', messageId)
+    .limit(1)
+
+  if (error || !rows?.length) return null
+
+  const row = rows[0] as MessageRow
+
+  let replyTo: ReplyInfo | undefined
+  if (row.reply_to_chat_message_id) {
+    const { data: replyRows } = await supabase
+      .from('chat_messages')
+      .select('id, user_id, message_content, created_at, reply_to_chat_message_id')
+      .eq('id', row.reply_to_chat_message_id)
+      .limit(1)
+
+    const replyRow = (replyRows as MessageRow[] | null)?.[0]
+    if (replyRow) {
+      const { data: replyProfiles } = await supabase
+        .from('profiles')
+        .select('id, username, avatar_url, overlay_url, profile_color, bio')
+        .eq('id', replyRow.user_id)
+        .limit(1)
+      const rp = (replyProfiles as ProfileRow[] | null)?.[0]
+      replyTo = {
+        id: replyRow.id,
+        sender: rp?.username ?? '…',
+        text: messageContentToHtml(replyRow.message_content),
+      }
+    }
+  }
+
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id, username, avatar_url, overlay_url, profile_color, bio')
+    .eq('id', row.user_id)
+    .limit(1)
+
+  const p = (profiles as ProfileRow[] | null)?.[0]
+  const username = p?.username ?? '…'
+
+  return {
+    id: row.id,
+    userId: row.user_id,
+    sender: username,
+    avatar: p ? profileInitial(p) : '?',
+    avatar_url: p?.avatar_url ?? null,
+    overlay_url: p?.overlay_url ?? null,
+    bio: p?.bio ?? null,
+    text: messageContentToHtml(row.message_content),
+    time: row.created_at ?? new Date().toISOString(),
+    color: p?.profile_color ?? 'primary',
+    is_read: row.is_read,
+    replyTo,
+  }
+}
+
 /**
  * Loads chat messages from Supabase, newest page first; `messages` is chronological (oldest → newest).
  */
@@ -112,6 +175,8 @@ export function useDirectMessageInfiniteQuery(chatId: MaybeRefOrGetter<string | 
     if (id == null || id === '' || id === 'new') return null
     return id
   })
+
+  const queryClient = useQueryClient()
 
   const query = useInfiniteQuery({
     queryKey: ['chatMessages', chatIdComputed],
@@ -125,6 +190,62 @@ export function useDirectMessageInfiniteQuery(chatId: MaybeRefOrGetter<string | 
       lastPage.length === PAGE_SIZE ? allPages.reduce((sum, p) => sum + p.length, 0) : undefined,
     enabled: () => chatIdComputed.value != null,
   })
+
+  let channel: RealtimeChannel | null = null
+
+  function teardown() {
+    if (channel) {
+      supabase.removeChannel(channel)
+      channel = null
+    }
+  }
+
+  watch(
+    chatIdComputed,
+    (cid) => {
+      teardown()
+      if (!cid) return
+
+      channel = supabase
+        .channel(`dm-messages:${cid}:${Math.random().toString(36).slice(2, 9)}`)
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `chat_id=eq.${cid}` },
+          async (payload) => {
+            const newMsg = await fetchMessageById((payload.new as { id: string }).id)
+            if (!newMsg) return
+
+            queryClient.setQueryData<InfiniteData<ChatMessage[]>>(['chatMessages', cid], (old) => {
+              if (!old) return old
+              const [firstPage, ...rest] = old.pages
+              return {
+                ...old,
+                pages: [[newMsg, ...(firstPage ?? [])], ...rest],
+              }
+            })
+          },
+        )
+        .on(
+          'postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'chat_messages', filter: `chat_id=eq.${cid}` },
+          (payload) => {
+            const updated = payload.new as { id: string; is_read: boolean }
+
+            queryClient.setQueryData<InfiniteData<ChatMessage[]>>(['chatMessages', cid], (old) => {
+              if (!old) return old
+              return {
+                ...old,
+                pages: old.pages.map((page) =>
+                  page.map((msg) => (msg.id === updated.id ? { ...msg, is_read: updated.is_read } : msg)),
+                ),
+              }
+            })
+          },
+        )
+        .subscribe()
+    },
+    { immediate: true },
+  )
 
   const messages = computed(() => {
     const pages = query.data.value?.pages ?? []
