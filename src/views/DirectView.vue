@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import ChannelList from '@/components/ChannelList.vue'
 import DirectMessageConversation from '@/components/DirectMessageConversation.vue'
 import { useRoute } from '@kitbag/router'
 import { computed } from 'vue'
@@ -12,7 +11,6 @@ const directId = computed(() => route.params.directId)
 </script>
 
 <template>
-  <ChannelList />
   <DirectMessageConversation
     :profileId="profileId"
     :chatId="directId"

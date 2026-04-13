@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import AppSidebar from '@/components/AppSidebar.vue'
+import ChannelList from '@/components/ChannelList.vue'
 import { supabase } from '@/lib/supabase'
 import type { Subscription } from '@supabase/supabase-js'
 
@@ -24,7 +25,10 @@ onUnmounted(() => {
 
 <template>
   <v-app>
-    <AppSidebar v-if="hasSession" />
+    <div v-if="hasSession">
+      <AppSidebar />
+      <ChannelList />
+    </div>
 
     <v-main class="main-content">
       <router-view />
