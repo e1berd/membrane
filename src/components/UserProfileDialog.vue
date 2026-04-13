@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { openIamWindow } from '@/lib/windows'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { useCurrentProfile } from '@/composables/useCurrentProfile'
+import { useRouter } from '@kitbag/router'
 
 const SettingsDialog = defineAsyncComponent(() => import('@/components/SettingsDialog.vue'))
 
@@ -46,6 +47,21 @@ async function handleLogout() {
     loggingOut.value = false
     dialog.value = false
   }
+}
+
+const router = useRouter()
+
+async function gotoDirect() {
+  if (!props.user.userId) return
+  const { data: chat } = await supabase
+    .from('chats')
+    .select('id, chat_members!inner(user_id)')
+    .eq('type', 'direct')
+    .eq('chat_members.user_id', props.user.userId)
+    .maybeSingle()
+  const directId = chat?.id ?? 'new'
+  dialog.value = false
+  await router.push('direct', { directId, profileId: props.user.userId })
 }
 
 const statusLabel: Record<string, string> = {
@@ -156,6 +172,7 @@ const statusColor: Record<string, string> = {
             variant="tonal"
             color="primary"
             prepend-icon="mdi-message-outline"
+            @click="gotoDirect"
           >
             Написать
           </v-btn>
